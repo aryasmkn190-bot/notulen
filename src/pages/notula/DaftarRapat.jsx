@@ -86,7 +86,7 @@ const DaftarRapat = () => {
       <Head title="Daftar Rapat Dinas - SMK Hassina Sukabumi" />
       <Content>
         {/* Header */}
-        <BlockHead size="sm" className="mb-4 pb-2">
+        <BlockHead size="sm" className="notula-page-header mb-4 mb-md-5">
           <BlockBetween className="align-items-start align-items-md-center flex-wrap gap-3">
             <BlockHeadContent>
               <div className="notula-page-meta">

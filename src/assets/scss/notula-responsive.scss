@@ -475,9 +475,24 @@
   line-height: 1.6 !important;
 }
 
+.nk-block-head {
+  margin-bottom: 2rem !important;
+}
+
 .nk-block-head-sm {
-  padding-bottom: 1.25rem !important;
-  margin-bottom: 1.75rem !important;
+  padding-bottom: 0.75rem !important;
+  margin-bottom: 2rem !important;
+}
+
+.notula-page-header {
+  margin-bottom: 2.25rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+@media (min-width: 768px) {
+  .notula-page-header {
+    margin-bottom: 2.75rem !important;
+  }
 }
 
 .dark-mode .notula-page-meta .meta-school-pill {

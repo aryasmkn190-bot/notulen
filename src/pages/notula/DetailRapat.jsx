@@ -221,7 +221,7 @@ const DetailRapat = () => {
       <Head title={`${meeting.judul} - Notula SMK Hassina`} />
       <Content>
         {/* Header Rapat */}
-        <BlockHead size="sm">
+        <BlockHead size="sm" className="notula-page-header mb-4 mb-md-5">
           <div className="mb-2">
             <Link to="/rapat" className="text-muted fs-12px d-inline-flex align-items-center">
               <Icon name="arrow-left" className="me-1" />

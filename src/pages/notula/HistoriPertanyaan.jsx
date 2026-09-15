@@ -103,7 +103,7 @@ const HistoriPertanyaan = () => {
       <Head title="Histori Pertanyaan & RTL - SMK Hassina" />
       <Content>
         {/* Header */}
-        <BlockHead size="sm" className="mb-4 pb-2">
+        <BlockHead size="sm" className="notula-page-header mb-4 mb-md-5">
           <BlockBetween className="align-items-center flex-wrap gap-2">
             <BlockHeadContent>
               <div className="notula-page-meta">

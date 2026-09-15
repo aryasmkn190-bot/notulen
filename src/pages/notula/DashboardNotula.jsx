@@ -124,7 +124,7 @@ const DashboardNotula = () => {
       <Head title="Beranda Notula - SMK Hassina Sukabumi" />
       <Content>
         {/* Native DashLite BlockHead (Spacious, Executive & Non-Cramped) */}
-        <BlockHead size="lg" className="mb-4 pb-2">
+        <BlockHead size="lg" className="notula-page-header mb-4 mb-md-5">
           <BlockBetween size="md" className="g-3 align-items-md-center">
             <BlockHeadContent>
               <div className="notula-page-meta">
