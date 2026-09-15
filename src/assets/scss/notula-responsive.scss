@@ -475,6 +475,26 @@
   line-height: 1.6 !important;
 }
 
+/* Fix DashLite legacy .gap-* utility locking container heights */
+.d-flex,
+.d-inline-flex,
+.nk-block-between,
+[class*="nk-block-between"],
+.row,
+.card,
+.flex-wrap {
+  &[class*="gap-"] {
+    height: auto !important;
+  }
+}
+
+.nk-block-head,
+.nk-block-between,
+[class*="nk-block-between"] {
+  height: auto !important;
+  min-height: auto !important;
+}
+
 .nk-block-head {
   margin-bottom: 2rem !important;
 }

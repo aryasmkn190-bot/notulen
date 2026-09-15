@@ -27,6 +27,7 @@ import Content from "@/layout/content/Content";
 import Head from "@/layout/head/Head";
 import {
   Block,
+  BlockBetween,
   BlockHead,
   BlockHeadContent,
   BlockTitle,
@@ -228,7 +229,7 @@ const DetailRapat = () => {
               Kembali ke Daftar Rapat
             </Link>
           </div>
-          <div className="nk-block-between flex-wrap gap-2 align-items-start">
+          <BlockBetween size="md" className="g-3 align-items-start">
             <BlockHeadContent style={{ maxWidth: "700px" }}>
               <div className="d-flex align-items-center gap-2 mb-3 flex-wrap">
                 <span className="badge badge-dim bg-primary">{meeting.jenis}</span>
@@ -255,7 +256,7 @@ const DetailRapat = () => {
               </BlockDes>
             </BlockHeadContent>
 
-            <BlockHeadContent>
+            <BlockHeadContent className="mt-3 mt-md-0">
               <div className="d-flex flex-wrap gap-2">
                 <Button
                   color="light"
@@ -283,7 +284,7 @@ const DetailRapat = () => {
                 </Button>
               </div>
             </BlockHeadContent>
-          </div>
+          </BlockBetween>
         </BlockHead>
 
         {/* Info Meta Card */}

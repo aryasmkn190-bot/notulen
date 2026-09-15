@@ -104,7 +104,7 @@ const HistoriPertanyaan = () => {
       <Content>
         {/* Header */}
         <BlockHead size="sm" className="notula-page-header mb-4 mb-md-5">
-          <BlockBetween className="align-items-center flex-wrap gap-2">
+          <BlockBetween size="md" className="g-3 align-items-md-center">
             <BlockHeadContent>
               <div className="notula-page-meta">
                 <span className="meta-school-pill">
@@ -119,7 +119,7 @@ const HistoriPertanyaan = () => {
                 <p className="mb-0">Seluruh aspirasi dewan guru &amp; staf sekolah dari musyawarah dinas serta perkembangan realisasinya.</p>
               </BlockDes>
             </BlockHeadContent>
-            <BlockHeadContent>
+            <BlockHeadContent className="mt-3 mt-md-0">
               <span className="badge bg-white text-primary border px-3 py-2 fs-13px shadow-sm rounded-pill fw-bold">
                 Total: {questions.length} Aspirasi Terarsip
               </span>

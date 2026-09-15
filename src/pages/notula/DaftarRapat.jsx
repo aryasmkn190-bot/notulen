@@ -87,7 +87,7 @@ const DaftarRapat = () => {
       <Content>
         {/* Header */}
         <BlockHead size="sm" className="notula-page-header mb-4 mb-md-5">
-          <BlockBetween className="align-items-start align-items-md-center flex-wrap gap-3">
+          <BlockBetween size="md" className="g-3 align-items-md-center">
             <BlockHeadContent>
               <div className="notula-page-meta">
                 <span className="meta-school-pill">
@@ -106,7 +106,7 @@ const DaftarRapat = () => {
                 <p className="mb-0">Arsip dokumen notulensi resmi, risalah rapat dinas, dan monitoring tindak lanjut (RTL) SMK Hassina Sukabumi.</p>
               </BlockDes>
             </BlockHeadContent>
-            <BlockHeadContent>
+            <BlockHeadContent className="mt-3 mt-md-0">
               <Button
                 color="primary"
                 className="fw-bold"

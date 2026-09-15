@@ -112,7 +112,7 @@ const RekapNotula = () => {
       <Content>
         {/* Header */}
         <BlockHead size="sm" className="notula-page-header mb-4 mb-md-5">
-          <BlockBetween className="align-items-center flex-wrap gap-2">
+          <BlockBetween size="md" className="g-3 align-items-md-center">
             <BlockHeadContent>
               <div className="notula-page-meta">
                 <span className="meta-school-pill">
@@ -127,7 +127,7 @@ const RekapNotula = () => {
                 <p className="mb-0">Analisis sebaran status tindak lanjut, beban penanggung jawab (PIC), dan wujud capaian program sekolah.</p>
               </BlockDes>
             </BlockHeadContent>
-            <BlockHeadContent>
+            <BlockHeadContent className="mt-3 mt-md-0">
               <div className="d-flex flex-wrap gap-2">
                 <Button color="white" className="btn-outline-light rounded-pill px-3 shadow-sm" size="sm" onClick={handleExport}>
                   <Icon name="download" className="me-1 text-primary" />
