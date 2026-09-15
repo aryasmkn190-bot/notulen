@@ -1,0 +1,520 @@
+/* ============================================================
+   Notula SMK Hassina - Responsive & Executive Theme Refinements
+   ============================================================ */
+
+/* 1. Header Sticky & Spacing Protection */
+.nk-wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 100vh !important;
+}
+
+.nk-header-fixed {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1030 !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
+}
+
+.dark-mode .nk-header-fixed {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border-bottom-color: #1e293b !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+.nk-content {
+  flex: 1 0 auto !important;
+  margin-top: 0 !important;
+  padding-top: 2.25rem !important;
+  padding-bottom: 3.5rem !important;
+}
+
+.nk-header-fixed + .nk-content {
+  margin-top: 0 !important;
+  padding-top: 2.25rem !important;
+}
+
+.nk-footer {
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
+  background: #ffffff !important;
+  border-top: 1px solid #e2e8f0 !important;
+  padding: 1.25rem 0 !important;
+}
+
+.dark-mode .nk-footer {
+  background: #0f172a !important;
+  border-top-color: #1e293b !important;
+}
+
+/* 2. Executive Hero Banner */
+.notula-hero-banner {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 60%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2.25rem 2.5rem;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3.5px;
+    background: linear-gradient(90deg, #1e40af 0%, #0284c7 60%, #38bdf8 100%);
+  }
+}
+
+.dark-mode .notula-hero-banner {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-color: #334155;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Executive Page Header Refinements */
+.notula-header-badges {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.5rem !important;
+  height: auto !important;
+  min-height: auto !important;
+  margin-bottom: 0.875rem !important;
+}
+
+.notula-dashboard-title {
+  font-size: 1.55rem !important;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  margin-bottom: 0.75rem !important;
+
+  @media (min-width: 576px) {
+    font-size: 1.75rem !important;
+  }
+
+  @media (min-width: 768px) {
+    font-size: 1.95rem !important;
+  }
+}
+
+.badge-instansi {
+  display: inline-flex;
+  align-items: center;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+}
+
+.dark-mode .badge-instansi {
+  background: rgba(30, 64, 175, 0.25);
+  color: #60a5fa;
+  border-color: #1d4ed8;
+}
+
+.badge-session {
+  display: inline-flex;
+  align-items: center;
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+}
+
+.dark-mode .badge-session {
+  background: #1e293b;
+  color: #cbd5e1;
+  border-color: #334155;
+}
+
+.live-indicator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #10b981;
+  display: inline-block;
+  margin-right: 6px;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+}
+
+/* 3. Stat Cards DashLite Executive */
+.stat-card-executive {
+  background: #ffffff;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3.5px;
+  }
+
+  &.stat-primary::after { background: #0971fe; }
+  &.stat-info::after { background: #0284c7; }
+  &.stat-warning::after { background: #f59e0b; }
+  &.stat-success::after { background: #10b981; }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+  }
+
+  .stat-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+  }
+
+  .stat-amount {
+    font-size: 2.1rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.15;
+    margin: 0.25rem 0;
+  }
+
+  .stat-subtext {
+    font-size: 0.8125rem;
+    color: #64748b;
+  }
+}
+
+.dark-mode .stat-card-executive {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  .stat-subtext { color: #94a3b8; }
+}
+
+/* 4. High-Contrast Badges */
+.badge-draf {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #cbd5e1 !important;
+  font-weight: 600 !important;
+}
+
+.badge-selesai {
+  background-color: #ecfdf5 !important;
+  color: #059669 !important;
+  border: 1px solid #a7f3d0 !important;
+  font-weight: 600 !important;
+}
+
+.badge-warning-strong {
+  background-color: #fffbeb !important;
+  color: #b45309 !important;
+  border: 1px solid #fde68a !important;
+  font-weight: 600 !important;
+}
+
+.badge-danger-strong {
+  background-color: #fef2f2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fecaca !important;
+  font-weight: 600 !important;
+}
+
+/* 5. Custom Scrollbar for Priority RTL Panel */
+.rtl-scroll-panel {
+  max-height: 440px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+}
+
+/* 6. RTL Item Box */
+.rtl-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    border-color: #cbd5e1;
+  }
+}
+
+.dark-mode .rtl-box {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+/* 7. Buttons & Chips */
+.btn-gradient-primary {
+  background: linear-gradient(135deg, #0971fe 0%, #1d4ed8 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(9, 113, 254, 0.28) !important;
+  transition: all 0.2s ease !important;
+
+  &:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(9, 113, 254, 0.38) !important;
+  }
+}
+
+.chip-soft {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+/* 8. Dashboard Enterprise Tables */
+.dashboard-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.dashboard-table {
+  width: 100%;
+  margin-bottom: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+
+  thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid #e2e8f0;
+    border-top: none;
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    transition: background-color 0.15s ease;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover td {
+    background-color: #f8fafc;
+  }
+}
+
+.dark-mode .dashboard-table {
+  thead th {
+    background: #1e293b;
+    color: #94a3b8;
+    border-bottom-color: #334155;
+  }
+  tbody td {
+    border-bottom-color: #334155;
+  }
+  tbody tr:hover td {
+    background-color: #1e293b;
+  }
+}
+
+.icon-squircle {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+
+  &.icon-squircle-primary {
+    background: rgba(9, 113, 254, 0.1);
+    color: #0971fe;
+  }
+  &.icon-squircle-warning {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+  }
+}
+
+.dark-mode .icon-squircle {
+  &.icon-squircle-primary {
+    background: rgba(9, 113, 254, 0.2);
+    color: #60a5fa;
+  }
+  &.icon-squircle-warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+  }
+}
+
+.text-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge-subtle-primary {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border: 1px solid #dbeafe !important;
+}
+
+.badge-subtle-info {
+  background: #f0f9ff !important;
+  color: #0284c7 !important;
+  border: 1px solid #e0f2fe !important;
+}
+
+.badge-subtle-warning {
+  background: #fffbeb !important;
+  color: #b45309 !important;
+  border: 1px solid #fef3c7 !important;
+}
+
+.badge-subtle-success {
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+  border: 1px solid #d1fae5 !important;
+}
+
+.badge-subtle-secondary {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+/* 8a. Notula Page Meta & Title (DashLite Standard Header) */
+.notula-page-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+
+  .meta-school-pill {
+    display: inline-flex;
+    align-items: center;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.4px;
+    padding: 0.35rem 0.85rem;
+    border-radius: 6px;
+  }
+
+  .meta-date-pill {
+    display: inline-flex;
+    align-items: center;
+    background: #ffffff;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    font-weight: 500;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 6px;
+  }
+}
+
+.notula-page-title {
+  font-size: 1.65rem !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  letter-spacing: -0.02em !important;
+  margin-bottom: 0.35rem !important;
+}
+
+.dark-mode .notula-page-meta .meta-school-pill {
+  background: rgba(30, 64, 175, 0.25);
+  color: #60a5fa;
+  border-color: #1d4ed8;
+}
+
+.dark-mode .notula-page-meta .meta-date-pill {
+  background: #1e293b;
+  color: #cbd5e1;
+  border-color: #334155;
+}
+
+.dark-mode .notula-page-title {
+  color: #f1f5f9 !important;
+}
+
+/* 8. Mobile Responsiveness */
+@media (max-width: 575.98px) {
+  .nk-content {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+  .card-inner {
+    padding: 1rem !important;
+  }
+}
+
+/* 9. Print Stylesheet */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .nk-header,
+  .nk-footer,
+  .nk-block-tools,
+  .btn,
+  .nav-tabs,
+  .no-print {
+    display: none !important;
+  }
+  .nk-content {
+    margin-top: 0 !important;
+    padding: 0 !important;
+  }
+  #print-area-doc {
+    display: block !important;
+  }
+}

@@ -1,0 +1,85 @@
+.dual-listbox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  &-column {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  &-item {
+    display: block;
+    padding: .5rem 1rem;
+    cursor: pointer;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    border-bottom: 1px solid $border-light;
+    transition: background-color 0.2s ease;
+    &:hover{
+      @extend .bg-lighter;
+    }
+    &:active,
+    &.selected {
+      @extend .bg-primary-dim;
+    }
+  }
+  &-empty{
+    padding: .5rem 1rem;
+  }
+  &-search {
+    @extend .form-control;
+  }
+  &-available,
+  &-selected {
+    border: 1px solid $border-light;
+    height: 300px;
+    overflow-y: auto;
+    padding: 0;
+    margin-top: 0;
+    border-radius: 0 0 $input-border-radius $input-border-radius;
+  }
+  &-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      flex-direction: row;
+      gap: .75rem;
+  }
+  &-button {
+      justify-content: center;
+      text-transform: capitalize;
+      white-space: nowrap;
+      @extend .btn;
+      @extend .btn-light;
+  }
+  &-title {
+    font-size: 1rem;
+    font-weight: $fw-medium;
+    padding: .5rem 1rem;
+    border-left: 1px solid $border-light;
+    border-right: 1px solid $border-light;
+    border-top: 1px solid $border-light;
+    margin-top: 1rem;
+    -webkit-margin-before: 1rem;
+    border-radius: $input-border-radius $input-border-radius 0 0;
+  }
+}
+
+@include media-breakpoint-up(md){
+  .dual-listbox{
+    flex-direction: row;
+    &-column{
+        width: 300px;
+    }
+    &-button{
+        width: 100%;
+    }
+    &-buttons{
+      flex-direction: column;
+    }
+  }
+}
