@@ -32,6 +32,7 @@
     "highlight.js": "^11.11.1",
     "html-react-parser": "^6.0.1",
     "nouislider-react": "^3.4.2",
+    "pg": "^8.23.0",
     "quill": "^2.0.3",
     "rc-tree": "^5.13.1",
     "react": "^19.2.5",

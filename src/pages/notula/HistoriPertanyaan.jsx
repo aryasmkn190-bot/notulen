@@ -27,7 +27,9 @@ import {
   BlockTitle,
   BlockDes,
   Icon,
+  UserAvatar,
 } from "@/components/Component";
+import { findUpper } from "@/utils/Utils";
 import {
   useNotula,
   fDate,
@@ -36,6 +38,31 @@ import {
   STATUS_LIST,
   OUTPUT_LIST,
 } from "@/notula-context/NotulaContext";
+
+const AVATAR_THEMES = [
+  "primary-dim",
+  "azure-dim",
+  "info-dim",
+  "purple-dim",
+  "teal-dim",
+  "warning-dim",
+  "success-dim",
+];
+
+// ponytail: avatar theme hashing; add user photo URLs when backend upload is available.
+const getAvatarTheme = (name = "") => {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AVATAR_THEMES[Math.abs(hash) % AVATAR_THEMES.length];
+};
+
+const getInitials = (name = "") => {
+  if (!name) return "??";
+  const up = findUpper(name);
+  return up || name.slice(0, 2).toUpperCase();
+};
 
 const HistoriPertanyaan = () => {
   const { questions, meetings, updateQuestion, deleteQuestion } = useNotula();
@@ -66,12 +93,18 @@ const HistoriPertanyaan = () => {
 
   const handleAddLogItem = () => {
     if (!logInput.trim() || !activeQ) return;
-    updateQuestion(activeQ.id, {}, logInput.trim());
+    const text = logInput.trim();
+    const newLogItem = { ts: Date.now(), teks: text };
+    updateQuestion(activeQ.id, {}, text);
     setLogInput("");
-    const refreshed = questions.find((item) => item.id === activeQ.id);
-    if (refreshed) {
-      setActiveQ({ ...refreshed });
-    }
+    setActiveQ((prev) =>
+      prev
+        ? {
+            ...prev,
+            log: [newLogItem, ...(prev.log || [])],
+          }
+        : null
+    );
   };
 
   const filteredQuestions = useMemo(() => {
@@ -85,6 +118,7 @@ const HistoriPertanyaan = () => {
         const matchesMeeting =
           filterMeeting === "all" || q.mid === filterMeeting;
 
+        const parentM = meetings.find((item) => item.id === q.mid);
         const term = search.toLowerCase();
         const matchesSearch =
           !term ||
@@ -92,11 +126,12 @@ const HistoriPertanyaan = () => {
           (q.penanya || "").toLowerCase().includes(term) ||
           (q.unit || "").toLowerCase().includes(term) ||
           (q.rencana || "").toLowerCase().includes(term) ||
-          (q.pic || "").toLowerCase().includes(term);
+          (q.pic || "").toLowerCase().includes(term) ||
+          (parentM?.judul || "").toLowerCase().includes(term);
 
         return matchesStatus && matchesKategori && matchesMeeting && matchesSearch;
       });
-  }, [questions, filterStatus, filterKategori, filterMeeting, search]);
+  }, [questions, meetings, filterStatus, filterKategori, filterMeeting, search]);
 
   return (
     <React.Fragment>
@@ -205,27 +240,45 @@ const HistoriPertanyaan = () => {
 
         {/* List Pertanyaan Table */}
         <Card className="card-bordered">
-          <div className="card-inner p-0">
+          <div className="card-inner p-0" style={{ overflowX: "auto" }}>
             {filteredQuestions.length === 0 ? (
               <div className="alert alert-light text-center py-5 m-3 border">
                 <Icon name="search" className="text-muted fs-2 mb-2" />
-                <p className="text-soft mb-0 fs-13px">
+                <p className="text-soft mb-2 fs-13px">
                   Tidak ada data pertanyaan yang sesuai dengan kriteria filter.
                 </p>
+                {(search || filterStatus !== "all" || filterKategori !== "all" || filterMeeting !== "all") && (
+                  <Button
+                    size="sm"
+                    color="outline-primary"
+                    onClick={() => {
+                      setSearch("");
+                      setFilterStatus("all");
+                      setFilterKategori("all");
+                      setFilterMeeting("all");
+                    }}
+                  >
+                    Reset Filter
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="nk-tb-list nk-tb-ulist">
                 <div className="nk-tb-item nk-tb-head bg-light py-2">
                   <div className="nk-tb-col">
-                    <span className="sub-text fw-bold">Pertanyaan & Penanya</span>
+                    <span className="sub-text fw-bold d-none d-md-inline">Pertanyaan</span>
+                    <span className="sub-text fw-bold d-md-none">Pertanyaan &amp; Penanya</span>
                   </div>
                   <div className="nk-tb-col tb-col-md">
+                    <span className="sub-text fw-bold">Penanya &amp; Unit</span>
+                  </div>
+                  <div className="nk-tb-col tb-col-lg">
                     <span className="sub-text fw-bold">Dokumen Rapat</span>
                   </div>
                   <div className="nk-tb-col tb-col-sm">
-                    <span className="sub-text fw-bold">Status & Output</span>
+                    <span className="sub-text fw-bold">Status &amp; Tindak Lanjut</span>
                   </div>
-                  <div className="nk-tb-col nk-tb-col-tools text-end">
+                  <div className="nk-tb-col text-end" style={{ width: "1%", whiteSpace: "nowrap" }}>
                     <span className="sub-text fw-bold">Aksi</span>
                   </div>
                 </div>
@@ -243,35 +296,61 @@ const HistoriPertanyaan = () => {
                       style={{ cursor: "pointer" }}
                       onClick={() => setActiveQ(q)}
                     >
-                      {/* Kolom Utama */}
+                      {/* Kolom Pertanyaan */}
                       <div className="nk-tb-col">
                         <div className="d-flex align-items-center mb-1 flex-wrap gap-1">
-                          <span
-                            className={`badge badge-dim bg-${statusObj.color} fs-11px`}
-                          >
-                            {statusObj.label}
-                          </span>
-                          <span className="badge badge-dim bg-light fs-11px">
+                          <span className="badge badge-dim bg-primary fs-11px">
                             {q.kategori}
                           </span>
-                          <span className="badge bg-outline-light text-muted fs-11px">
+                          <span
+                            className={`badge ${
+                              q.prioritas === "Tinggi"
+                                ? "badge-danger-strong"
+                                : q.prioritas === "Sedang"
+                                ? "badge-warning-strong"
+                                : "bg-light text-muted border"
+                            } fs-11px`}
+                          >
                             Prioritas {q.prioritas}
                           </span>
+                          {q.dibacakan && (
+                            <span className="badge badge-dim bg-success fs-11px" title="Dibacakan dalam rapat">
+                              <Icon name="mic" className="me-1" />
+                              Dibacakan
+                            </span>
+                          )}
                         </div>
 
-                        <h6 className="title fs-14px mb-1 text-dark">
+                        <h6 className="title fs-14px mb-1 text-dark fw-bold" style={{ lineHeight: "1.45" }}>
                           {q.teks}
                         </h6>
 
-                        <span className="sub-text text-muted fs-11px d-block">
-                          Penanya: <strong>{q.penanya || "Anonim"}</strong>
-                          {q.unit ? ` (${q.unit})` : ""} · PIC:{" "}
-                          <strong>{q.pic || "Belum ditentukan"}</strong>
-                        </span>
+                        {/* Mobile info Penanya (< md) */}
+                        <div className="d-md-none text-muted fs-12px mt-1 d-flex align-items-center gap-1 flex-wrap">
+                          <Icon name="user-fill" className="text-primary fs-11px" />
+                          <strong className="text-dark">{q.penanya || "Anonim"}</strong>
+                          {q.unit && <span className="text-soft">({q.unit})</span>}
+                        </div>
 
-                        {/* Mobile info rapat & deadline */}
-                        <div className="d-md-none text-muted fs-11px mt-1">
-                          {m && <span>Rapat: {m.judul} · </span>}
+                        {/* Mobile info Rapat (< lg) */}
+                        {m && (
+                          <div className="d-lg-none text-muted fs-11px mt-1 d-flex align-items-center gap-1 flex-wrap">
+                            <Icon name="calendar-alt" className="me-1" />
+                            <span>{m.judul}</span>
+                            <span className="text-soft">· {fDate(m.tanggal, true)}</span>
+                          </div>
+                        )}
+
+                        {/* Mobile ringkasan status & deadline (< sm) */}
+                        <div className="d-sm-none text-muted fs-11px mt-2 d-flex align-items-center gap-2 flex-wrap">
+                          <span className={`badge badge-dim bg-${statusObj.color} fs-11px`}>
+                            {statusObj.label}
+                          </span>
+                          {q.pic && (
+                            <span>
+                              PIC: <strong className="text-dark">{q.pic}</strong>
+                            </span>
+                          )}
                           {q.tenggat && (
                             <span
                               className={
@@ -279,7 +358,7 @@ const HistoriPertanyaan = () => {
                                   ? "text-danger fw-bold"
                                   : sisa <= 3
                                   ? "text-warning fw-bold"
-                                  : ""
+                                  : "text-muted"
                               }
                             >
                               Tenggat: {fDate(q.tenggat, true)}
@@ -288,57 +367,129 @@ const HistoriPertanyaan = () => {
                         </div>
                       </div>
 
-                      {/* Kolom Rapat (Desktop) */}
+                      {/* Kolom Penanya & Unit (Desktop & Tablet) */}
                       <div className="nk-tb-col tb-col-md">
-                        {m ? (
-                          <div>
-                            <span className="tb-amount text-truncate d-block fs-13px">
-                              {m.judul}
+                        <div className="user-card">
+                          <UserAvatar
+                            theme={getAvatarTheme(q.penanya || "")}
+                            text={getInitials(q.penanya)}
+                            size="sm"
+                          />
+                          <div className="user-info ms-2">
+                            <span className="tb-lead fw-bold text-dark fs-13px d-block">
+                              {q.penanya || "Anonim"}
                             </span>
-                            <span className="sub-text text-soft fs-11px">
-                              {fDate(m.tanggal, true)}
+                            <span className="sub-text text-muted fs-11px d-block">
+                              {q.unit || "Dewan Guru / Staf"}
                             </span>
                           </div>
+                        </div>
+                      </div>
+
+                      {/* Kolom Rapat (Desktop) */}
+                      <div className="nk-tb-col tb-col-lg">
+                        {m ? (
+                          <div>
+                            <Link
+                              to={`/rapat/${m.id}`}
+                              className="tb-amount text-primary fw-bold fs-13px d-block text-truncate"
+                              style={{ maxWidth: "220px" }}
+                              title={m.judul}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {m.judul}
+                            </Link>
+                            <div className="d-flex align-items-center gap-1.5 flex-wrap fs-11px text-soft mt-1">
+                              {m.jenis && (
+                                <span className="badge bg-light text-muted border px-1.5 py-0 fs-10px">
+                                  {m.jenis}
+                                </span>
+                              )}
+                              <span>
+                                <Icon name="calendar" className="me-1" />
+                                {fDate(m.tanggal, true)}
+                              </span>
+                            </div>
+                          </div>
                         ) : (
-                          <span className="text-muted fs-12px">-</span>
+                          <span className="text-muted fs-12px">—</span>
                         )}
                       </div>
 
-                      {/* Kolom Status & Output (Tablet ke atas) */}
+                      {/* Kolom Status & Tindak Lanjut (Tablet ke atas) */}
                       <div className="nk-tb-col tb-col-sm">
-                        {q.output && q.output !== "Belum ditentukan" && (
-                          <span className="badge bg-light text-dark border d-block mb-1 fs-11px">
-                            {q.output}
-                          </span>
-                        )}
-                        {q.tenggat && (
+                        <div className="mb-1 d-flex align-items-center gap-1 flex-wrap">
                           <span
-                            className={`badge ${
-                              sisa < 0
-                                ? "bg-danger"
-                                : sisa <= 3
-                                ? "bg-warning text-dark"
-                                : "bg-light text-muted"
-                            } fs-11px`}
+                            className={`badge badge-dim bg-${statusObj.color} fs-11px fw-bold`}
                           >
-                            {fDate(q.tenggat, true)}
+                            {statusObj.label}
                           </span>
+                          {q.output && q.output !== "Belum ditentukan" && (
+                            <span className="badge badge-subtle-primary fs-10px">
+                              {q.output}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="fs-11px text-muted mb-1">
+                          PIC: <strong className="text-dark">{q.pic || "Belum ada"}</strong>
+                        </div>
+
+                        {/* Progres realisasi */}
+                        <div className="d-flex align-items-center gap-2">
+                          <div
+                            className="progress flex-grow-1"
+                            style={{ height: "5px", width: "65px", borderRadius: "10px", background: "#e2e8f0" }}
+                            title={`Progres realisasi: ${q.progres || 0}%`}
+                          >
+                            <div
+                              className={`progress-bar ${
+                                (q.progres || 0) >= 100
+                                  ? "bg-success"
+                                  : (q.progres || 0) >= 50
+                                  ? "bg-info"
+                                  : "bg-warning"
+                              }`}
+                              style={{ width: `${q.progres || 0}%`, borderRadius: "10px" }}
+                            />
+                          </div>
+                          <span className="fs-10px text-muted fw-bold">{q.progres || 0}%</span>
+                        </div>
+
+                        {q.tenggat && (
+                          <div className="mt-1">
+                            <span
+                              className={`badge ${
+                                sisa < 0
+                                  ? "badge-danger-strong"
+                                  : sisa <= 3
+                                  ? "badge-warning-strong"
+                                  : "bg-light text-muted border"
+                              } fs-10px`}
+                            >
+                              <Icon name="clock" className="me-1" />
+                              {fDate(q.tenggat, true)}
+                            </span>
+                          </div>
                         )}
                       </div>
 
                       {/* Kolom Tombol Aksi */}
-                      <div className="nk-tb-col nk-tb-col-tools text-end">
+                      <div className="nk-tb-col text-end" style={{ width: "1%", whiteSpace: "nowrap" }}>
                         <Button
                           color="primary"
                           outline
                           size="sm"
+                          className="btn-dim"
+                          style={{ whiteSpace: "nowrap" }}
                           onClick={(e) => {
                             e.stopPropagation();
                             setActiveQ(q);
                           }}
+                          title="Kelola Tindak Lanjut"
                         >
+                          <Icon name="edit-alt" className="me-sm-1" />
                           <span className="d-none d-sm-inline">RTL</span>
-                          <Icon name="edit" className="ms-sm-1" />
                         </Button>
                       </div>
                     </div>
@@ -366,19 +517,38 @@ const HistoriPertanyaan = () => {
               <Form onSubmit={handleSaveActiveQ}>
                 <ModalBody>
                   <div className="bg-light p-3 rounded mb-3">
-                    <div className="d-flex justify-content-between mb-1">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
                       <span className="badge badge-dim bg-primary">
                         {activeQ.kategori}
                       </span>
-                      <span className="sub-text text-muted">
+                      <span
+                        className={`badge ${
+                          activeQ.prioritas === "Tinggi"
+                            ? "badge-danger-strong"
+                            : activeQ.prioritas === "Sedang"
+                            ? "badge-warning-strong"
+                            : "bg-light text-muted border"
+                        } fs-11px`}
+                      >
                         Prioritas {activeQ.prioritas}
                       </span>
                     </div>
-                    <h5 className="fs-15px text-dark mb-1">{activeQ.teks}</h5>
-                    <span className="sub-text text-muted">
-                      Diajukan oleh: <strong>{activeQ.penanya || "Anonim"}</strong>
-                      {activeQ.unit ? ` · ${activeQ.unit}` : ""}
-                    </span>
+                    <h5 className="fs-15px text-dark mb-2 fw-bold">{activeQ.teks}</h5>
+                    <div className="d-flex align-items-center mt-2">
+                      <UserAvatar
+                        theme={getAvatarTheme(activeQ.penanya || "")}
+                        text={getInitials(activeQ.penanya)}
+                        size="sm"
+                      />
+                      <div className="user-info ms-2">
+                        <span className="tb-lead fw-bold text-dark fs-12px d-block">
+                          {activeQ.penanya || "Anonim"}
+                        </span>
+                        <span className="sub-text text-muted fs-11px d-block">
+                          {activeQ.unit || "Dewan Guru / Staf"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   <Row className="g-3">
