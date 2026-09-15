@@ -86,8 +86,8 @@ const DaftarRapat = () => {
       <Head title="Daftar Rapat Dinas - SMK Hassina Sukabumi" />
       <Content>
         {/* Header */}
-        <BlockHead size="sm" className="mb-4">
-          <BlockBetween className="align-items-center flex-wrap gap-2">
+        <BlockHead size="sm" className="mb-4 pb-2">
+          <BlockBetween className="align-items-start align-items-md-center flex-wrap gap-3">
             <BlockHeadContent>
               <div className="notula-page-meta">
                 <span className="meta-school-pill">
@@ -103,7 +103,7 @@ const DaftarRapat = () => {
                 Daftar Rapat &amp; Sidang Dinas
               </BlockTitle>
               <BlockDes className="text-soft">
-                <p>Arsip dokumen notulensi resmi, risalah rapat dinas, dan monitoring tindak lanjut (RTL) SMK Hassina Sukabumi.</p>
+                <p className="mb-0">Arsip dokumen notulensi resmi, risalah rapat dinas, dan monitoring tindak lanjut (RTL) SMK Hassina Sukabumi.</p>
               </BlockDes>
             </BlockHeadContent>
             <BlockHeadContent>

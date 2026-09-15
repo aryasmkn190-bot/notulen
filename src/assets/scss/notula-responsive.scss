@@ -30,7 +30,7 @@
   flex: 1 0 auto !important;
   margin-top: 0 !important;
   padding-top: 2.25rem !important;
-  padding-bottom: 3.5rem !important;
+  padding-bottom: 4rem !important;
 }
 
 .nk-header-fixed + .nk-content {
@@ -432,7 +432,7 @@
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.625rem !important;
   flex-wrap: wrap;
 
   .meta-school-pill {
@@ -466,7 +466,18 @@
   font-weight: 700 !important;
   color: #1e293b !important;
   letter-spacing: -0.02em !important;
-  margin-bottom: 0.35rem !important;
+  margin-bottom: 0.75rem !important;
+  line-height: 1.35 !important;
+}
+
+.nk-block-des p {
+  margin-bottom: 0 !important;
+  line-height: 1.6 !important;
+}
+
+.nk-block-head-sm {
+  padding-bottom: 1.25rem !important;
+  margin-bottom: 1.75rem !important;
 }
 
 .dark-mode .notula-page-meta .meta-school-pill {

@@ -111,7 +111,7 @@ const RekapNotula = () => {
       <Head title="Rekapitulasi Notulensi - SMK Hassina" />
       <Content>
         {/* Header */}
-        <BlockHead size="sm" className="mb-4">
+        <BlockHead size="sm" className="mb-4 pb-2">
           <BlockBetween className="align-items-center flex-wrap gap-2">
             <BlockHeadContent>
               <div className="notula-page-meta">
@@ -124,7 +124,7 @@ const RekapNotula = () => {
                 Rekapitulasi &amp; Monitoring Notulensi
               </BlockTitle>
               <BlockDes className="text-soft">
-                <p>Analisis sebaran status tindak lanjut, beban penanggung jawab (PIC), dan wujud capaian program sekolah.</p>
+                <p className="mb-0">Analisis sebaran status tindak lanjut, beban penanggung jawab (PIC), dan wujud capaian program sekolah.</p>
               </BlockDes>
             </BlockHeadContent>
             <BlockHeadContent>
