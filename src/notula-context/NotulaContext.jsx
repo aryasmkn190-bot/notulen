@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { getSeedData } from "./seedData.js";
+import { useAuth } from "./AuthContext";
 
 const NotulaContext = createContext();
 
@@ -88,6 +89,8 @@ export function sisaHari(d) {
 
 // ponytail: optimistic React state + background REST fetch; add WebSockets/SSE when multi-user concurrent presence is requested.
 export const NotulaProvider = ({ children }) => {
+  const { token, user } = useAuth();
+
   const [data, setData] = useState(() => {
     try {
       const raw = localStorage.getItem(STORE_KEY);
@@ -127,59 +130,129 @@ export const NotulaProvider = ({ children }) => {
     } catch (e) {}
   }, [data]);
 
+  const authHeaders = () => ({
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  });
+
   // Meetings CRUD
-  const addMeeting = (m) => {
+  const addMeeting = async (m) => {
     const newM = {
       id: uid("m-"),
       status: "draf",
       agenda: "",
       catatan: "",
       keputusan: "",
+      is_finalized: false,
       ...m,
     };
     setData((prev) => ({
       ...prev,
       meetings: [newM, ...prev.meetings],
     }));
-    fetch("/api/meetings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newM),
-    }).catch((err) => console.error("API error adding meeting:", err));
+
+    try {
+      const res = await fetch("/api/meetings", {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(newM),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        refreshFromDb();
+        throw new Error(err.error || "Gagal membuat rapat baru.");
+      }
+    } catch (err) {
+      console.error("API error adding meeting:", err);
+      throw err;
+    }
     return newM;
   };
 
-  const updateMeeting = (id, fields) => {
+  const updateMeeting = async (id, fields) => {
     setData((prev) => ({
       ...prev,
       meetings: prev.meetings.map((m) =>
         m.id === id ? { ...m, ...fields } : m
       ),
     }));
-    fetch(`/api/meetings/${encodeURIComponent(id)}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(fields),
-    }).catch((err) => console.error("API error updating meeting:", err));
+
+    try {
+      const res = await fetch(`/api/meetings/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify(fields),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        refreshFromDb();
+        throw new Error(err.error || "Gagal memperbarui rapat.");
+      }
+    } catch (err) {
+      console.error("API error updating meeting:", err);
+      throw err;
+    }
   };
 
-  const deleteMeeting = (id) => {
+  const finalizeMeeting = async (id, isFinalized = true) => {
+    try {
+      const res = await fetch(`/api/meetings/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify({ is_finalized: isFinalized }),
+      });
+      const resData = await res.json();
+      if (!res.ok) {
+        refreshFromDb();
+        throw new Error(resData.error || "Gagal mengubah status finalisasi rapat.");
+      }
+      setData((prev) => ({
+        ...prev,
+        meetings: prev.meetings.map((m) =>
+          m.id === id ? { ...m, ...resData } : m
+        ),
+      }));
+      return resData;
+    } catch (err) {
+      console.error("API error finalizing meeting:", err);
+      throw err;
+    }
+  };
+
+  const deleteMeeting = async (id) => {
     setData((prev) => ({
       ...prev,
       meetings: prev.meetings.filter((m) => m.id !== id),
       questions: prev.questions.filter((q) => q.mid !== id),
     }));
-    fetch(`/api/meetings/${encodeURIComponent(id)}`, {
-      method: "DELETE",
-    }).catch((err) => console.error("API error deleting meeting:", err));
+
+    try {
+      const res = await fetch(`/api/meetings/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        headers: authHeaders(),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        refreshFromDb();
+        throw new Error(err.error || "Gagal menghapus rapat.");
+      }
+    } catch (err) {
+      console.error("API error deleting meeting:", err);
+      throw err;
+    }
   };
 
   // Questions CRUD
-  const addQuestion = (q) => {
+  const addQuestion = async (q) => {
+    const penanyaName = (user && user.role === "guru") ? user.nama : (q.penanya || "Anonim");
+    const unitName = (user && user.role === "guru") ? (user.unit || "") : (q.unit || "");
+    const qUserId = user ? user.id : (q.user_id || null);
+
     const newQ = {
       id: uid("q-"),
-      penanya: "",
-      unit: "",
+      user_id: qUserId,
+      penanya: penanyaName,
+      unit: unitName,
       teks: "",
       kategori: "Lainnya",
       prioritas: "Sedang",
@@ -191,61 +264,103 @@ export const NotulaProvider = ({ children }) => {
       tenggat: "",
       progres: 0,
       keterangan: "",
+      lampiran: [],
       createdAt: Date.now(),
       log: [
         {
           ts: Date.now(),
-          teks: "Pertanyaan dicatat ke dalam sistem Notula SMK Hassina.",
+          teks: user ? `Pertanyaan dicatat oleh ${user.nama} (${user.role}).` : "Pertanyaan dicatat ke dalam sistem Notula SMK Hassina.",
         },
       ],
       ...q,
     };
+
     setData((prev) => ({
       ...prev,
       questions: [newQ, ...prev.questions],
     }));
-    fetch("/api/questions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newQ),
-    }).catch((err) => console.error("API error adding question:", err));
-    return newQ;
+
+    try {
+      const res = await fetch("/api/questions", {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(newQ),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        refreshFromDb();
+        throw new Error(err.error || "Gagal mengajukan pertanyaan.");
+      }
+      const saved = await res.json();
+      setData((prev) => ({
+        ...prev,
+        questions: prev.questions.map((item) => (item.id === newQ.id ? saved : item)),
+      }));
+      return saved;
+    } catch (err) {
+      console.error("API error adding question:", err);
+      throw err;
+    }
   };
 
-  const updateQuestion = (id, fields, logTeks) => {
+  const updateQuestion = async (id, fields, logTeks) => {
     setData((prev) => ({
       ...prev,
       questions: prev.questions.map((q) => {
         if (q.id !== id) return q;
         const newLog = [...q.log];
         if (logTeks) {
-          newLog.unshift({ ts: Date.now(), teks: logTeks });
+          const author = user ? `${user.nama} (${user.role}): ` : "";
+          newLog.unshift({ ts: Date.now(), teks: `${author}${logTeks}` });
         }
         return { ...q, ...fields, log: newLog };
       }),
     }));
-    fetch(`/api/questions/${encodeURIComponent(id)}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...fields, logTeks }),
-    }).catch((err) => console.error("API error updating question:", err));
+
+    try {
+      const res = await fetch(`/api/questions/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify({ ...fields, logTeks }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        refreshFromDb();
+        throw new Error(err.error || "Gagal memperbarui pertanyaan.");
+      }
+    } catch (err) {
+      console.error("API error updating question:", err);
+      throw err;
+    }
   };
 
-  const deleteQuestion = (id) => {
+  const deleteQuestion = async (id) => {
     setData((prev) => ({
       ...prev,
       questions: prev.questions.filter((q) => q.id !== id),
     }));
-    fetch(`/api/questions/${encodeURIComponent(id)}`, {
-      method: "DELETE",
-    }).catch((err) => console.error("API error deleting question:", err));
+
+    try {
+      const res = await fetch(`/api/questions/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        headers: authHeaders(),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        refreshFromDb();
+        throw new Error(err.error || "Gagal menghapus pertanyaan.");
+      }
+    } catch (err) {
+      console.error("API error deleting question:", err);
+      throw err;
+    }
   };
 
   const resetSample = () => {
     const fresh = getSeedData();
     setData(fresh);
     localStorage.setItem(STORE_KEY, JSON.stringify(fresh));
-    fetch("/api/reset", { method: "POST" })
+    fetch("/api/reset", { method: "POST", headers: authHeaders() })
       .then((res) => res.json())
       .then((json) => {
         if (json.meetings && json.questions) {
@@ -265,7 +380,7 @@ export const NotulaProvider = ({ children }) => {
       localStorage.setItem(STORE_KEY, JSON.stringify(importedData));
       fetch("/api/import", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify(importedData),
       }).catch((err) => console.error("API error importing JSON:", err));
       return true;
@@ -282,6 +397,7 @@ export const NotulaProvider = ({ children }) => {
         refreshFromDb,
         addMeeting,
         updateMeeting,
+        finalizeMeeting,
         deleteMeeting,
         addQuestion,
         updateQuestion,

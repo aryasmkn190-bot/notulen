@@ -36,13 +36,16 @@ import {
   todayISO,
   JENIS_LIST,
 } from "@/notula-context/NotulaContext";
+import { useAuth } from "@/notula-context/AuthContext";
 
 const DaftarRapat = () => {
+  const { isSuperAdmin, isGuru } = useAuth();
   const { meetings, questions, addMeeting, deleteMeeting } = useNotula();
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
   const [filterJenis, setFilterJenis] = useState("all");
+  const [filterDate, setFilterDate] = useState("");
 
   // Modal Buat Rapat Baru
   const [modalNewMeeting, setModalNewMeeting] = useState(false);
@@ -70,6 +73,7 @@ const DaftarRapat = () => {
       .sort((a, b) => (b.tanggal || "").localeCompare(a.tanggal || ""))
       .filter((m) => {
         const matchesJenis = filterJenis === "all" || m.jenis === filterJenis;
+        const matchesDate = !filterDate || m.tanggal === filterDate;
         const term = search.toLowerCase();
         const matchesSearch =
           !term ||
@@ -77,9 +81,9 @@ const DaftarRapat = () => {
           (m.tempat || "").toLowerCase().includes(term) ||
           (m.notulis || "").toLowerCase().includes(term) ||
           (m.pemimpin || "").toLowerCase().includes(term);
-        return matchesJenis && matchesSearch;
+        return matchesJenis && matchesDate && matchesSearch;
       });
-  }, [meetings, search, filterJenis]);
+  }, [meetings, search, filterJenis, filterDate]);
 
   return (
     <React.Fragment>
@@ -103,18 +107,20 @@ const DaftarRapat = () => {
                 Daftar Rapat &amp; Sidang Dinas
               </BlockTitle>
               <BlockDes className="text-soft">
-                <p className="mb-0">Arsip dokumen notulensi resmi, risalah rapat dinas, dan monitoring tindak lanjut (RTL) SMK Hassina Sukabumi.</p>
+                <p className="mb-0">Arsip dokumen notulensi resmi rapat dinas dan monitoring tindak lanjut (RTL) SMK Hassina Sukabumi.</p>
               </BlockDes>
             </BlockHeadContent>
             <BlockHeadContent className="mt-3 mt-md-0">
-              <Button
-                color="primary"
-                className="fw-bold"
-                onClick={() => setModalNewMeeting(true)}
-              >
-                <Icon name="plus" className="me-1" />
-                <span>Catat Rapat Baru</span>
-              </Button>
+              {!isGuru && (
+                <Button
+                  color="primary"
+                  className="fw-bold"
+                  onClick={() => setModalNewMeeting(true)}
+                >
+                  <Icon name="plus" className="me-1" />
+                  <span>Catat Rapat Baru</span>
+                </Button>
+              )}
             </BlockHeadContent>
           </BlockBetween>
         </BlockHead>
@@ -124,7 +130,7 @@ const DaftarRapat = () => {
           <Card className="card-bordered mb-4 bg-white">
             <CardBody className="card-inner py-3 px-3 px-md-4 align-items-center">
               <Row className="g-3 align-items-center">
-                <Col md="6" sm="12">
+                <Col md="4" sm="12">
                   <div className="form-control-wrap">
                     <div className="form-icon form-icon-left">
                       <Icon name="search" />
@@ -132,13 +138,13 @@ const DaftarRapat = () => {
                     <Input
                       type="text"
                       className="form-control"
-                      placeholder="Cari topik, tempat, pemimpin, atau notulis..."
+                      placeholder="Cari topik, tempat, pemimpin..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                     />
                   </div>
                 </Col>
-                <Col md="4" sm="8">
+                <Col md="3" sm="6">
                   <Input
                     type="select"
                     value={filterJenis}
@@ -152,8 +158,43 @@ const DaftarRapat = () => {
                     ))}
                   </Input>
                 </Col>
-                <Col md="2" sm="4" className="text-sm-end text-soft fs-13px">
-                  <span>{filteredMeetings.length} rapat ditemukan</span>
+                <Col md="3" sm="6">
+                  <div className="input-group">
+                    <Input
+                      type="date"
+                      value={filterDate}
+                      onChange={(e) => setFilterDate(e.target.value)}
+                      title="Filter Berdasarkan Tanggal Rapat"
+                    />
+                    {filterDate && (
+                      <Button
+                        color="light"
+                        outline
+                        size="sm"
+                        onClick={() => setFilterDate("")}
+                        title="Hapus filter tanggal"
+                      >
+                        <Icon name="cross" />
+                      </Button>
+                    )}
+                  </div>
+                </Col>
+                <Col md="2" sm="12" className="text-sm-end text-soft fs-13px d-flex align-items-center justify-content-between justify-content-md-end gap-2">
+                  <span>{filteredMeetings.length} rapat</span>
+                  {(search || filterJenis !== "all" || filterDate) && (
+                    <Button
+                      size="xs"
+                      color="outline-danger"
+                      onClick={() => {
+                        setSearch("");
+                        setFilterJenis("all");
+                        setFilterDate("");
+                      }}
+                      title="Reset semua filter"
+                    >
+                      Reset
+                    </Button>
+                  )}
                 </Col>
               </Row>
             </CardBody>
@@ -165,16 +206,34 @@ const DaftarRapat = () => {
               <Icon name="calendar-booking" className="text-muted fs-1 mb-2" />
               <h5>Belum Ada Rapat yang Cocok</h5>
               <p className="text-soft mb-3">
-                Coba sesuaikan kata kunci pencarian atau catat agenda rapat baru.
+                Coba sesuaikan kata kunci pencarian, filter jenis, atau tanggal rapat.
               </p>
-              <Button
-                color="primary"
-                size="sm"
-                onClick={() => setModalNewMeeting(true)}
-              >
-                <Icon name="plus" className="me-1" />
-                <span>Catat Rapat Baru</span>
-              </Button>
+              {(search || filterJenis !== "all" || filterDate) && (
+                <div className="mb-3">
+                  <Button
+                    color="outline-primary"
+                    size="sm"
+                    onClick={() => {
+                      setSearch("");
+                      setFilterJenis("all");
+                      setFilterDate("");
+                    }}
+                  >
+                    <Icon name="reload" className="me-1" />
+                    <span>Reset Filter</span>
+                  </Button>
+                </div>
+              )}
+              {!isGuru && (
+                <Button
+                  color="primary"
+                  size="sm"
+                  onClick={() => setModalNewMeeting(true)}
+                >
+                  <Icon name="plus" className="me-1" />
+                  <span>Catat Rapat Baru</span>
+                </Button>
+              )}
             </div>
           ) : (
             <Row className="g-3">
@@ -196,7 +255,15 @@ const DaftarRapat = () => {
                               <span className="badge badge-dim bg-primary fs-11px">
                                 {m.jenis}
                               </span>
-                              {m.status === "selesai" ? (
+                              {m.is_finalized ? (
+                                <span
+                                  className="badge badge-dim bg-info fs-11px fw-bold"
+                                  title={`Tervalidasi & Final oleh ${m.finalized_by || "Super Admin"}`}
+                                >
+                                  <Icon name="shield-check" className="me-1" />
+                                  Final
+                                </span>
+                              ) : m.status === "selesai" ? (
                                 <span className="badge badge-dim bg-success fs-11px fw-bold">
                                   Selesai
                                 </span>
@@ -216,32 +283,29 @@ const DaftarRapat = () => {
                               </DropdownToggle>
                               <DropdownMenu end className="dropdown-menu-sm">
                                 <DropdownItem tag={Link} to={`/rapat/${m.id}`}>
-                                  <Icon name="edit" className="me-2" />
-                                  <span>Buka Notula</span>
+                                  <Icon name="file-text" className="me-2" />
+                                  <span>Buka Notulensi</span>
                                 </DropdownItem>
-                                <DropdownItem
-                                  tag={Link}
-                                  to={`/rapat/${m.id}?reader=true`}
-                                >
-                                  <Icon name="play" className="me-2" />
-                                  <span>Mode Bacakan</span>
-                                </DropdownItem>
-                                <DropdownItem divider />
-                                <DropdownItem
-                                  className="text-danger"
-                                  onClick={() => {
-                                    if (
-                                      window.confirm(
-                                        `Hapus dokumen rapat "${m.judul}" beserta seluruh pertanyaan di dalamnya?`
-                                      )
-                                    ) {
-                                      deleteMeeting(m.id);
-                                    }
-                                  }}
-                                >
-                                  <Icon name="trash" className="me-2" />
-                                  <span>Hapus</span>
-                                </DropdownItem>
+                                {isSuperAdmin && (
+                                  <>
+                                    <DropdownItem divider />
+                                    <DropdownItem
+                                      className="text-danger"
+                                      onClick={() => {
+                                        if (
+                                          window.confirm(
+                                            `Hapus dokumen rapat "${m.judul}" beserta seluruh pertanyaan di dalamnya?`
+                                          )
+                                        ) {
+                                          deleteMeeting(m.id);
+                                        }
+                                      }}
+                                    >
+                                      <Icon name="trash" className="me-2" />
+                                      <span>Hapus</span>
+                                    </DropdownItem>
+                                  </>
+                                )}
                               </DropdownMenu>
                             </UncontrolledDropdown>
                           </div>
@@ -286,19 +350,12 @@ const DaftarRapat = () => {
                         </div>
 
                         {/* Footer Card Actions */}
-                        <div className="d-flex justify-content-between align-items-center pt-2 border-top gap-2">
-                          <Link
-                            to={`/rapat/${m.id}?reader=true`}
-                            className="btn btn-sm btn-outline-light text-dark bg-white"
-                          >
-                            <Icon name="play" className="me-1 text-primary" />
-                            <span>Bacakan</span>
-                          </Link>
+                        <div className="pt-2 border-top">
                           <Link
                             to={`/rapat/${m.id}`}
-                            className="btn btn-sm btn-primary"
+                            className="btn btn-sm btn-primary w-100 justify-content-center fw-bold"
                           >
-                            <Icon name="edit" className="me-1" />
+                            <Icon name="file-text" className="me-1" />
                             <span>Buka Notulensi</span>
                           </Link>
                         </div>

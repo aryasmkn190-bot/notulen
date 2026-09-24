@@ -5,8 +5,6 @@ import Logo from "../logo/Logo";
 import Menu from "../menu/Menu";
 import MenuMobile from "../menu/MenuMobile";
 import User from "./dropdown/user/User";
-import { Link } from "react-router-dom";
-import { Icon } from "@/components/Component";
 import { useTheme, useThemeUpdate } from "@/layout/provider/Theme";
 
 const Header = ({ fixed, className, menuData, ...props }) => {
@@ -26,7 +24,7 @@ const Header = ({ fixed, className, menuData, ...props }) => {
       <div className="container-fluid">
         <div className="nk-header-wrap">
           {/* Mobile Menu Trigger */}
-          <div className="nk-menu-trigger me-2 d-lg-none">
+          <div className="nk-menu-trigger d-lg-none">
             <Toggle
               className="nk-nav-toggle nk-quick-nav-icon"
               icon="menu"
@@ -73,24 +71,8 @@ const Header = ({ fixed, className, menuData, ...props }) => {
           )}
 
           {/* Header Tools */}
-          <div className="nk-header-tools ms-2">
+          <div className="nk-header-tools">
             <ul className="nk-quick-nav d-flex align-items-center">
-              {/* Quick Action Button */}
-              <li className="d-none d-sm-inline-block">
-                <Link
-                  to="/rapat"
-                  className="btn btn-sm btn-primary rounded-pill px-3 shadow-sm fw-bold"
-                  style={{
-                    background: "linear-gradient(135deg, #0971fe 0%, #1d4ed8 100%)",
-                    border: "none",
-                    boxShadow: "0 2px 8px rgba(9, 113, 254, 0.3)",
-                  }}
-                >
-                  <Icon name="plus" className="me-1" />
-                  <span>Catat Rapat</span>
-                </Link>
-              </li>
-
               {/* User Dropdown Profile & Theme Toggle */}
               <li className="user-dropdown">
                 <User />

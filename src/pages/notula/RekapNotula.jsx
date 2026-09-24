@@ -201,13 +201,13 @@ const RekapNotula = () => {
               </Card>
             </Col>
 
-            {/* Output Nyata */}
+            {/* Output */}
             <Col md="6">
               <Card className="card-bordered h-100 bg-white">
                 <CardBody className="card-inner p-4">
                   <h6 className="title mb-1 fs-16px text-dark">
                     <Icon name="award" className="text-success me-2" />
-                    Output Nyata yang Dihasilkan
+                    Output yang Dihasilkan
                   </h6>
                   <p className="sub-text text-muted mb-3 fs-12px">
                     Aspirasi & pertanyaan rapat yang direalisasikan menjadi instrumen sekolah:

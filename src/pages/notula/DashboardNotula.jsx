@@ -1,5 +1,10 @@
 import React, { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import listPlugin from "@fullcalendar/list";
+import bootstrapPlugin from "@fullcalendar/bootstrap5";
 import {
   Card,
   CardBody,
@@ -119,6 +124,31 @@ const DashboardNotula = () => {
     .sort((a, b) => (b.tanggal || "").localeCompare(a.tanggal || ""))
     .slice(0, 6);
 
+  // Event rapat untuk FullCalendar di Beranda
+  const calendarEvents = useMemo(() => {
+    return meetings.map((m) => {
+      let eventClass = "fc-event-primary";
+      if (m.jenis === "Rapat Kurikulum") eventClass = "fc-event-info";
+      else if (m.jenis === "Rapat Kesiswaan") eventClass = "fc-event-warning";
+      else if (m.jenis === "Rapat Guru") eventClass = "fc-event-success";
+      else if (m.jenis === "Rapat Dinas") eventClass = "fc-event-primary";
+      else eventClass = "fc-event-secondary";
+
+      return {
+        id: m.id,
+        title: `${m.waktu ? m.waktu + " · " : ""}${m.judul}`,
+        start: m.tanggal,
+        className: eventClass,
+        extendedProps: {
+          tempat: m.tempat,
+          pemimpin: m.pemimpin,
+          jenis: m.jenis,
+          status: m.status,
+        },
+      };
+    });
+  }, [meetings]);
+
   return (
     <React.Fragment>
       <Head title="Beranda Notula - SMK Hassina Sukabumi" />
@@ -150,7 +180,7 @@ const DashboardNotula = () => {
               </BlockTitle>
               <BlockDes>
                 <p className="fs-15px mb-0" style={{ maxWidth: "780px", lineHeight: "1.75", color: "#526484" }}>
-                  Dokumentasi resmi risalah musyawarah guru & tenaga kependidikan, arsip keputusan dinas, serta pemantauan terpusat realisasi rencana tindak lanjut (RTL).
+                  Dokumentasi resmi catatan notulensi musyawarah guru & tenaga kependidikan, arsip keputusan dinas, serta pemantauan terpusat realisasi rencana tindak lanjut (RTL).
                 </p>
               </BlockDes>
             </BlockHeadContent>
@@ -629,6 +659,62 @@ const DashboardNotula = () => {
           </Row>
         </Block>
 
+        {/* Kalender Agenda Rapat Dinas (FullCalendar) */}
+        <Block className="mt-4">
+          <Card className="card-bordered bg-white">
+            <div className="card-inner border-bottom py-3 px-3 px-md-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div className="d-flex align-items-center gap-2">
+                <div
+                  className="d-flex align-items-center justify-content-center bg-primary-dim text-primary rounded-3"
+                  style={{ width: "36px", height: "36px" }}
+                >
+                  <Icon name="calendar-alt" className="fs-18px" />
+                </div>
+                <div>
+                  <h6 className="title fs-15px text-dark fw-bold mb-0">Kalender Agenda Rapat Dinas</h6>
+                  <span className="text-soft fs-12px">Klik jadwal rapat pada kalender untuk langsung membuka dokumen notulensi</span>
+                </div>
+              </div>
+              <div className="d-flex align-items-center gap-1.5 flex-wrap">
+                <span className="badge badge-dim bg-primary fs-11px">Rapat Dinas</span>
+                <span className="badge badge-dim bg-info fs-11px">Kurikulum</span>
+                <span className="badge badge-dim bg-warning fs-11px">Kesiswaan</span>
+                <span className="badge badge-dim bg-success fs-11px">Rapat Guru</span>
+              </div>
+            </div>
+            <CardBody className="p-3 p-md-4">
+              <div className="calendar-notula-wrap">
+                <FullCalendar
+                  plugins={[dayGridPlugin, timeGridPlugin, listPlugin, bootstrapPlugin]}
+                  events={calendarEvents}
+                  eventClick={(info) => {
+                    if (info.event && info.event.id) {
+                      navigate(`/rapat/${info.event.id}`);
+                    }
+                  }}
+                  initialView="dayGridMonth"
+                  headerToolbar={{
+                    left: "title prev,next",
+                    center: null,
+                    right: "today dayGridMonth,timeGridWeek,listWeek",
+                  }}
+                  buttonText={{
+                    today: "Hari Ini",
+                    dayGridMonth: "Bulan",
+                    timeGridWeek: "Minggu",
+                    listWeek: "Daftar",
+                  }}
+                  themeSystem="bootstrap5"
+                  height="auto"
+                  aspectRatio={2.1}
+                  editable={false}
+                  droppable={false}
+                />
+              </div>
+            </CardBody>
+          </Card>
+        </Block>
+
         {/* Modal Catat Rapat Baru */}
         <Modal
           isOpen={modalNewMeeting}
@@ -777,7 +863,7 @@ const DashboardNotula = () => {
                 <Col sm="6">
                   <FormGroup>
                     <Label className="form-label fw-bold fs-13px" htmlFor="m-notulis">
-                      Notulis (Pencatat Risalah)
+                      Notulis (Pencatat Notulensi)
                     </Label>
                     <Input
                       type="text"

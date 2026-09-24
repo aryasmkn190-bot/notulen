@@ -1,8 +1,10 @@
 import React, { useEffect } from "react";
-import { Routes, Route, useLocation, BrowserRouter } from "react-router-dom";
+import { Routes, Route, useLocation, BrowserRouter, Navigate, Outlet } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/notula-context/AuthContext";
 import { NotulaProvider } from "@/notula-context/NotulaContext";
 
-// Notula Pages
+// Auth & Notula Pages
+import Login from "@/pages/auth/Login";
 import DashboardNotula from "@/pages/notula/DashboardNotula";
 import DaftarRapat from "@/pages/notula/DaftarRapat";
 import DetailRapat from "@/pages/notula/DetailRapat";
@@ -31,6 +33,7 @@ import Error404Modern from "@/pages/error/404-modern";
 import Layout from "@/layout/Index";
 import LayoutNoSidebar from "@/layout/Index-nosidebar";
 import ThemeProvider from "@/layout/provider/Theme";
+import { Spinner } from "reactstrap";
 
 const ScrollToTop = (props) => {
   const location = useLocation();
@@ -39,6 +42,47 @@ const ScrollToTop = (props) => {
   }, [location]);
 
   return <>{props.children}</>;
+};
+
+// Protected route checking active session
+const ProtectedLayout = () => {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return (
+      <div className="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+        <div className="text-center">
+          <Spinner color="primary" />
+          <p className="mt-2 text-soft fs-13px">Memuat sesi pengguna Notula...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <Layout />;
+};
+
+// Role guard for Beranda (Guru is redirected to /rapat)
+const HomeRouteGuard = () => {
+  const { user } = useAuth();
+  if (user?.role === "guru") {
+    return <Navigate to="/rapat" replace />;
+  }
+  return <DashboardNotula />;
+};
+
+// Role guard for Rekap (Guru is redirected to /rapat)
+const RekapRouteGuard = () => {
+  const { user } = useAuth();
+  if (user?.role === "guru") {
+    return <Navigate to="/rapat" replace />;
+  }
+  return <RekapNotula />;
 };
 
 const Pages = () => {
@@ -50,43 +94,49 @@ const Pages = () => {
       }}
     >
       <ScrollToTop>
-        <NotulaProvider>
-          <Routes>
-            <Route element={<ThemeProvider />}>
-              <Route element={<Layout />}>
-                {/* Core Notula Routes */}
-                <Route index element={<DashboardNotula />} />
-                <Route path="rapat" element={<DaftarRapat />} />
-                <Route path="rapat/:id" element={<DetailRapat />} />
-                <Route path="pertanyaan" element={<HistoriPertanyaan />} />
-                <Route path="rekap" element={<RekapNotula />} />
+        <AuthProvider>
+          <NotulaProvider>
+            <Routes>
+              <Route element={<ThemeProvider />}>
+                {/* Public Auth Routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/auth-login" element={<Login />} />
 
-                {/* DashLite Demo Components */}
-                <Route path="components">
-                  <Route index element={<Component />} />
-                  <Route path="alerts" element={<Alerts />} />
-                  <Route path="badges" element={<Badges />} />
-                  <Route path="buttons" element={<Buttons />} />
-                  <Route path="cards" element={<Cards />} />
-                  <Route path="modals" element={<Modals />} />
-                  <Route path="tabs" element={<Tabs />} />
-                  <Route path="toast" element={<Toast />} />
-                  <Route path="form-elements" element={<FormElements />} />
-                  <Route path="form-layouts" element={<FormLayouts />} />
+                {/* Protected Application Routes */}
+                <Route element={<ProtectedLayout />}>
+                  <Route index element={<HomeRouteGuard />} />
+                  <Route path="rapat" element={<DaftarRapat />} />
+                  <Route path="rapat/:id" element={<DetailRapat />} />
+                  <Route path="pertanyaan" element={<HistoriPertanyaan />} />
+                  <Route path="rekap" element={<RekapRouteGuard />} />
+
+                  {/* DashLite Demo Components */}
+                  <Route path="components">
+                    <Route index element={<Component />} />
+                    <Route path="alerts" element={<Alerts />} />
+                    <Route path="badges" element={<Badges />} />
+                    <Route path="buttons" element={<Buttons />} />
+                    <Route path="cards" element={<Cards />} />
+                    <Route path="modals" element={<Modals />} />
+                    <Route path="tabs" element={<Tabs />} />
+                    <Route path="toast" element={<Toast />} />
+                    <Route path="form-elements" element={<FormElements />} />
+                    <Route path="form-layouts" element={<FormLayouts />} />
+                  </Route>
+                  <Route path="table-basic" element={<BasicTable />} />
+                  <Route path="table-datatable" element={<DataTablePage />} />
+                  <Route path="charts/chartjs" element={<ChartPage />} />
+                  <Route path="nioicon" element={<NioIconPage />} />
+                  <Route path="svg-icons" element={<SVGIconPage />} />
                 </Route>
-                <Route path="table-basic" element={<BasicTable />} />
-                <Route path="table-datatable" element={<DataTablePage />} />
-                <Route path="charts/chartjs" element={<ChartPage />} />
-                <Route path="nioicon" element={<NioIconPage />} />
-                <Route path="svg-icons" element={<SVGIconPage />} />
-              </Route>
 
-              <Route element={<LayoutNoSidebar />}>
-                <Route path="*" element={<Error404Modern />} />
+                <Route element={<LayoutNoSidebar />}>
+                  <Route path="*" element={<Error404Modern />} />
+                </Route>
               </Route>
-            </Route>
-          </Routes>
-        </NotulaProvider>
+            </Routes>
+          </NotulaProvider>
+        </AuthProvider>
       </ScrollToTop>
     </BrowserRouter>
   );
