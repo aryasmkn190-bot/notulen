@@ -1,14 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 const Head = ({ ...props }) => {
   return (
-      <Title>{`${props.title ? props.title + " | " : null}DashLite React Admin Template`}</Title>
+    <Title>{`${props.title ? props.title + " | " : ""}SMK Hassina Sukabumi`}</Title>
   );
 };
 export default Head;
-
-
-import { useEffect } from 'react';
 
 function Title({ children }) {
   useEffect(() => {
