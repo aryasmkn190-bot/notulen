@@ -25,6 +25,7 @@ import {
   Spinner,
 } from "reactstrap";
 import classnames from "classnames";
+import "./live-header.css";
 import LogoHassina from "@/images/logo-hassina.png";
 import Head from "@/layout/head/Head";
 import { Icon } from "@/components/Component";
@@ -367,9 +368,9 @@ const LiveSessionRapat = () => {
       <Head title={`Live Rapat: ${meeting.judul} | SMK Hassina`} />
       <div className="min-vh-100 d-flex flex-column" style={{ backgroundColor: "#f8fafc" }}>
         {/* Sticky Live Topbar */}
-        <header className="bg-white border-bottom sticky-top shadow-xs">
-          <div className="container-xl py-2.5 px-3 px-md-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
-            <div className="d-flex align-items-center gap-2">
+        <header className="live-meeting-header bg-white border-bottom sticky-top shadow-xs">
+          <div className="container-xl px-md-4 live-header-inner">
+            <div className="live-header-brand">
               <img
                 src={LogoHassina}
                 alt="SMK Hassina"
@@ -389,14 +390,14 @@ const LiveSessionRapat = () => {
                   )}
                 </div>
                 <div className="text-muted fs-11px">
-                  Sinkron otomatis tiap 3 detik
+                  Diperbarui otomatis
                   {lastSync ? ` · ${lastSync.toLocaleTimeString("id-ID")}` : ""}
                 </div>
               </div>
             </div>
 
             {/* Participant Identity Pill */}
-            <div className="d-flex align-items-center gap-2 bg-light border rounded-pill px-3 py-1">
+            <div className="live-header-identity">
               <Icon name="user-check" className="text-primary fs-14px" />
               <div className="lh-sm">
                 <strong className="text-dark fs-12px d-block">{participant.nama}</strong>
@@ -406,7 +407,7 @@ const LiveSessionRapat = () => {
                 type="button"
                 onClick={handleEditIdentity}
                 className="btn btn-xs btn-icon text-muted border-0 p-0 ms-1"
-                title="Ubah nama atau jabatan"
+                title="Ubah nama atau jabatan" aria-label="Ubah nama atau jabatan"
               >
                 <Icon name="edit" />
               </button>

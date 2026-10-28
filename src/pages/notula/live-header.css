@@ -1,0 +1,21 @@
+.live-meeting-header .live-header-inner { display:flex; align-items:center; justify-content:space-between; gap:20px; padding-top:14px; padding-bottom:14px; }
+.live-meeting-header .live-header-brand { display:flex; align-items:center; gap:12px; min-width:0; }
+.live-meeting-header .live-header-brand > img { flex-shrink:0; }
+.live-meeting-header .live-header-brand > div { min-width:0; }
+.live-meeting-header .live-header-brand > div > div:first-child { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.live-meeting-header .live-header-brand .badge { flex-shrink:0; white-space:nowrap; }
+.live-meeting-header .live-header-brand > div > div:last-child { margin-top:4px; font-size:11px; line-height:1.5; }
+.live-meeting-header .live-header-identity { display:flex; align-items:center; gap:10px; padding:9px 12px; border:1px solid #e2e8f0; border-radius:12px; background:#f8fafc; min-width:0; max-width:44%; }
+.live-meeting-header .live-header-identity > .icon { flex-shrink:0; }
+.live-meeting-header .live-header-identity > div { min-width:0; flex:1; }
+.live-meeting-header .live-header-identity strong { font-size:13px; line-height:1.45; overflow-wrap:anywhere; }
+.live-meeting-header .live-header-identity span { line-height:1.5; overflow-wrap:anywhere; }
+.live-meeting-header .live-header-identity button { flex-shrink:0; display:flex; align-items:center; justify-content:center; min-width:36px; min-height:36px; margin:0!important; padding:0!important; border-radius:8px; }
+@media(max-width:575.98px) {
+ .live-meeting-header .live-header-inner { flex-direction:column; align-items:stretch; gap:12px; padding:14px 16px; }
+ .live-meeting-header .live-header-brand { gap:10px; }
+ .live-meeting-header .live-header-brand > div { flex:1; }
+ .live-meeting-header .live-header-brand > div > div:first-child > span:first-child { font-size:14px; }
+ .live-meeting-header .live-header-identity { width:100%; max-width:none; padding:9px 12px; }
+ .live-meeting-header .live-header-identity span { display:block; font-size:11px; }
+}
