@@ -61,6 +61,8 @@ const getJenisBadgeColor = (jenis) => {
 const DashboardNotula = () => {
   const { meetings, questions, addMeeting } = useNotula();
   const navigate = useNavigate();
+  const [calendarMeetingId, setCalendarMeetingId] = useState(null);
+  const calendarMeeting = meetings.find((m) => m.id === calendarMeetingId);
 
   // Modal Buat Rapat Baru
   const [modalNewMeeting, setModalNewMeeting] = useState(false);
@@ -672,7 +674,7 @@ const DashboardNotula = () => {
                 </div>
                 <div>
                   <h6 className="title fs-15px text-dark fw-bold mb-0">Kalender Agenda Rapat Dinas</h6>
-                  <span className="text-soft fs-12px">Klik jadwal rapat pada kalender untuk langsung membuka dokumen notulensi</span>
+                  <span className="text-soft fs-12px">Klik jadwal rapat untuk melihat informasi dan membuka catatan rapat</span>
                 </div>
               </div>
               <div className="d-flex align-items-center gap-1.5 flex-wrap">
@@ -688,9 +690,8 @@ const DashboardNotula = () => {
                   plugins={[dayGridPlugin, timeGridPlugin, listPlugin, bootstrapPlugin]}
                   events={calendarEvents}
                   eventClick={(info) => {
-                    if (info.event && info.event.id) {
-                      navigate(`/rapat/${info.event.id}`);
-                    }
+                    info.jsEvent?.preventDefault();
+                    if (info.event?.id) setCalendarMeetingId(info.event.id);
                   }}
                   initialView="dayGridMonth"
                   headerToolbar={{
@@ -714,6 +715,55 @@ const DashboardNotula = () => {
             </CardBody>
           </Card>
         </Block>
+
+        {/* Calendar preview: navigation requires an explicit second action. */}
+        <Modal isOpen={Boolean(calendarMeeting)} toggle={() => setCalendarMeetingId(null)} centered size="lg">
+          <ModalHeader toggle={() => setCalendarMeetingId(null)}>Informasi Rapat</ModalHeader>
+          {calendarMeeting && (
+            <>
+              <ModalBody className="p-3 p-md-4">
+                <div className="d-flex flex-wrap mb-3" style={{ gap: 8 }}>
+                  <Badge color="primary" className="badge-dim">{calendarMeeting.jenis || "Rapat Dinas"}</Badge>
+                  <Badge color={calendarMeeting.status === "selesai" ? "success" : "warning"} className="badge-dim">
+                    {calendarMeeting.status === "selesai" ? "Notulensi selesai" : "Draf notulensi"}
+                  </Badge>
+                  {calendarMeeting.is_live_active && <Badge color="success">Sesi live aktif</Badge>}
+                </div>
+                <h5 className="text-dark mb-3" style={{ lineHeight: 1.4, overflowWrap: "anywhere" }}>{calendarMeeting.judul}</h5>
+                <Row className="g-3">
+                  {[
+                    ["Tanggal", fDate(calendarMeeting.tanggal)],
+                    ["Waktu", calendarMeeting.waktu],
+                    ["Tempat", calendarMeeting.tempat],
+                    ["Pemimpin Rapat", calendarMeeting.pemimpin],
+                    ["Notulis", calendarMeeting.notulis],
+                    ["Peserta Rapat", calendarMeeting.peserta],
+                  ].map(([label, value]) => (
+                    <Col sm="6" key={label}>
+                      <div className="text-muted fs-12px mb-1">{label}</div>
+                      <div className="text-dark fw-semibold" style={{ overflowWrap: "anywhere" }}>{value || "Belum ditentukan"}</div>
+                    </Col>
+                  ))}
+                </Row>
+                <div className="bg-light border rounded-3 mt-4" style={{ padding: 14 }}>
+                  <div className="fw-bold text-dark mb-2">Agenda Rapat</div>
+                  <div style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", maxHeight: 200, overflowY: "auto" }}>
+                    {calendarMeeting.agenda || "Agenda belum ditambahkan."}
+                  </div>
+                </div>
+                <p className="text-muted fs-12px mt-3 mb-0">
+                  {questions.filter((q) => q.mid === calendarMeeting.id).length} pertanyaan tercatat. Buka catatan rapat untuk melihat notulensi, keputusan, dan tindak lanjut.
+                </p>
+              </ModalBody>
+              <ModalFooter style={{ gap: 8 }}>
+                <Button color="light" onClick={() => setCalendarMeetingId(null)}>Tutup</Button>
+                <Button color="primary" onClick={() => { const id = calendarMeeting.id; setCalendarMeetingId(null); navigate(`/rapat/${id}`); }}>
+                  <Icon name="file-docs" className="me-1" /><span>Buka Catatan Rapat</span>
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </Modal>
 
         {/* Modal Catat Rapat Baru */}
         <Modal
