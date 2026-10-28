@@ -57,6 +57,7 @@ const DetailRapat = () => {
   const {
     meetings,
     questions,
+    refreshFromDb,
     updateMeeting,
     finalizeMeeting,
     deleteMeeting,
@@ -425,6 +426,68 @@ const DetailRapat = () => {
     window.print();
   };
 
+  // Share & Live Session Modal State
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [copiedKey, setCopiedKey] = useState("");
+  const [togglingLive, setTogglingLive] = useState(false);
+
+  // Auto-refresh questions & state every 4s when meeting is in active live session
+  useEffect(() => {
+    if (!meeting?.is_live_active) return;
+    const timer = setInterval(() => {
+      if (refreshFromDb) refreshFromDb();
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [meeting?.is_live_active, refreshFromDb]);
+
+  const publicUrl = meeting?.public_token
+    ? `${window.location.origin}/publik/${meeting.public_token}`
+    : "";
+  const liveUrl = meeting?.live_token
+    ? `${window.location.origin}/sesi/${meeting.live_token}`
+    : "";
+
+  const handleCopyLink = (url, key) => {
+    if (!url) return;
+    navigator.clipboard.writeText(url);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(""), 2500);
+  };
+
+  const handleToggleLiveSession = async () => {
+    if (isGuru) return;
+    setTogglingLive(true);
+    try {
+      await updateMeeting(id, { is_live_active: !meeting.is_live_active });
+    } catch (err) {
+      alert(err.message || "Gagal mengubah status sesi rapat aktif.");
+    } finally {
+      setTogglingLive(false);
+    }
+  };
+
+  const handleRegenerateToken = async (type) => {
+    if (isGuru) return;
+    const label = type === "public" ? "Tautan Publik Notulensi" : "Tautan Sesi Rapat Aktif";
+    if (
+      !window.confirm(
+        `Perbarui ${label}?
+
+Tautan lama tidak akan bisa diakses lagi dan Anda perlu membagikan tautan yang baru.`
+      )
+    ) {
+      return;
+    }
+    try {
+      await updateMeeting(
+        id,
+        type === "public" ? { regenerate_public_token: true } : { regenerate_live_token: true }
+      );
+    } catch (err) {
+      alert(err.message || "Gagal memperbarui tautan.");
+    }
+  };
+
   return (
     <React.Fragment>
       <Head title={`${meeting.judul} - Notula SMK Hassina`} />
@@ -460,6 +523,11 @@ const DetailRapat = () => {
                 ) : (
                   <Badge color="warning" className="badge-dim">
                     Draf Notula
+                  </Badge>
+                )}
+                {meeting.is_live_active && (
+                  <Badge color="danger" className="fw-bold px-2">
+                    ● SESI LIVE AKTIF
                   </Badge>
                 )}
               </div>
@@ -502,6 +570,15 @@ const DetailRapat = () => {
                     <span>Info Terkunci</span>
                   </Button>
                 ) : null}
+                <Button
+                  color={meeting.is_live_active ? "success" : "info"}
+                  size="sm"
+                  onClick={() => setShareModalOpen(true)}
+                  className="fw-bold"
+                >
+                  <Icon name="share-alt" className="me-1" />
+                  <span>{meeting.is_live_active ? "Sesi Live Aktif & Bagikan" : "Bagikan & Sesi Live"}</span>
+                </Button>
                 <Button
                   color="light"
                   outline
@@ -2421,6 +2498,170 @@ const DetailRapat = () => {
                 Tutup
               </Button>
             </div>
+          </ModalFooter>
+        </Modal>
+
+        {/* Modal Bagikan Publik & Sesi Rapat Aktif */}
+        <Modal isOpen={shareModalOpen} toggle={() => setShareModalOpen(false)} size="lg">
+          <ModalHeader toggle={() => setShareModalOpen(false)}>
+            <div className="d-flex align-items-center gap-2">
+              <Icon name="share-alt" className="text-primary fs-4" />
+              <span className="fw-bold">Bagikan Notulensi &amp; Sesi Rapat Interaktif</span>
+            </div>
+          </ModalHeader>
+          <ModalBody className="p-3 p-md-4">
+            {/* 1. SESI RAPAT AKTIF (INTERAKTIF UNTUK GURU) */}
+            <div
+              className={`p-3 p-md-3.5 rounded-4 border mb-4 ${
+                meeting.is_live_active ? "border-success bg-success-dim bg-opacity-10" : "bg-light"
+              }`}
+            >
+              <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                <div>
+                  <div className="d-flex align-items-center gap-2 mb-1">
+                    <h6 className="fw-bold text-dark fs-15px mb-0">
+                      1. Tautan Sesi Rapat Aktif (Interaktif Guru)
+                    </h6>
+                    {meeting.is_live_active ? (
+                      <span className="badge bg-success text-white rounded-pill fs-10px px-2">
+                        ● AKTIF MENERIMA PERTANYAAN
+                      </span>
+                    ) : (
+                      <span className="badge bg-secondary text-white rounded-pill fs-10px px-2">
+                        NONAKTIF
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-muted fs-12px mb-0">
+                    Bagikan tautan ini saat rapat sedang berlangsung. Guru wajib mengisi <strong>Nama &amp; Jabatan</strong> (misal Wali Kelas / Guru Mapel) sebelum masuk, lalu dapat mengajukan pertanyaan, melihat catatan notulen secara <em>real-time</em>, dan memantau tindak lanjut pertanyaannya.
+                  </p>
+                </div>
+
+                {!isGuru && (
+                  <Button
+                    size="sm"
+                    color={meeting.is_live_active ? "danger" : "success"}
+                    disabled={togglingLive}
+                    onClick={handleToggleLiveSession}
+                    className="fw-bold flex-shrink-0"
+                  >
+                    <Icon name={meeting.is_live_active ? "stop-fill" : "play-fill"} className="me-1" />
+                    <span>{meeting.is_live_active ? "Tutup Sesi Live" : "Buka Sesi Live Sekarang"}</span>
+                  </Button>
+                )}
+              </div>
+
+              <div className="input-group mt-3">
+                <input
+                  type="text"
+                  readOnly
+                  className="form-control bg-white fs-12px"
+                  value={liveUrl}
+                  onClick={(e) => e.target.select()}
+                />
+                <Button
+                  color="primary"
+                  size="sm"
+                  onClick={() => handleCopyLink(liveUrl, "live")}
+                >
+                  <Icon name={copiedKey === "live" ? "check" : "copy"} className="me-1" />
+                  <span>{copiedKey === "live" ? "Tersalin!" : "Salin Link Sesi"}</span>
+                </Button>
+                <a
+                  href={liveUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn btn-outline-primary btn-sm d-flex align-items-center"
+                  title="Buka halaman Sesi Rapat Aktif di tab baru"
+                >
+                  <Icon name="external" />
+                </a>
+              </div>
+
+              {!isGuru && (
+                <div className="d-flex justify-content-between align-items-center mt-2 pt-1">
+                  <span className="text-muted fs-11px">
+                    <Icon name="shield-check" className="me-1 text-success" />
+                    Dilindungi token acak &amp; pembatas laju (anti-spam).
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleRegenerateToken("live")}
+                    className="btn btn-link btn-xs p-0 text-muted text-decoration-none fs-11px"
+                  >
+                    <Icon name="reload" className="me-1" />
+                    Reset Link Sesi
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* 2. TAUTAN PUBLIK NOTULENSI & PANTAUAN RTL (READ-ONLY TANPA LOGIN) */}
+            <div className="p-3 p-md-3.5 rounded-4 border bg-white">
+              <div className="mb-2">
+                <div className="d-flex align-items-center gap-2 mb-1">
+                  <h6 className="fw-bold text-dark fs-15px mb-0">
+                    2. Tautan Publik Catatan Notulensi &amp; Pantauan RTL (Tanpa Login)
+                  </h6>
+                  <span className="badge badge-dim bg-primary rounded-pill fs-10px px-2">
+                    MODE BACA &amp; PANTAU
+                  </span>
+                </div>
+                <p className="text-muted fs-12px mb-0">
+                  Siapa pun yang memiliki tautan ini dapat membaca hasil notulensi rapat, daftar pertanyaan, serta memantau progres Rencana Tindak Lanjut (apakah sudah ada keputusan, PIC, atau dokumen bukti/SK) tanpa perlu login.
+                </p>
+              </div>
+
+              <div className="input-group mt-3">
+                <input
+                  type="text"
+                  readOnly
+                  className="form-control bg-light fs-12px"
+                  value={publicUrl}
+                  onClick={(e) => e.target.select()}
+                />
+                <Button
+                  color="primary"
+                  outline
+                  size="sm"
+                  onClick={() => handleCopyLink(publicUrl, "pub")}
+                >
+                  <Icon name={copiedKey === "pub" ? "check" : "copy"} className="me-1" />
+                  <span>{copiedKey === "pub" ? "Tersalin!" : "Salin Link Publik"}</span>
+                </Button>
+                <a
+                  href={publicUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn btn-outline-secondary btn-sm d-flex align-items-center"
+                  title="Buka halaman Notulensi Publik di tab baru"
+                >
+                  <Icon name="external" />
+                </a>
+              </div>
+
+              {!isGuru && (
+                <div className="d-flex justify-content-between align-items-center mt-2 pt-1">
+                  <span className="text-muted fs-11px">
+                    <Icon name="lock" className="me-1 text-primary" />
+                    Hanya membuka rapat ini (tidak mengekspos rapat lain).
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleRegenerateToken("public")}
+                    className="btn btn-link btn-xs p-0 text-muted text-decoration-none fs-11px"
+                  >
+                    <Icon name="reload" className="me-1" />
+                    Reset Link Publik
+                  </button>
+                </div>
+              )}
+            </div>
+          </ModalBody>
+          <ModalFooter className="bg-light">
+            <Button color="secondary" size="sm" onClick={() => setShareModalOpen(false)}>
+              Tutup
+            </Button>
           </ModalFooter>
         </Modal>
 

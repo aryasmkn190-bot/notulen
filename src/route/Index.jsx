@@ -10,6 +10,8 @@ import DaftarRapat from "@/pages/notula/DaftarRapat";
 import DetailRapat from "@/pages/notula/DetailRapat";
 import HistoriPertanyaan from "@/pages/notula/HistoriPertanyaan";
 import RekapNotula from "@/pages/notula/RekapNotula";
+import PublicNotula from "@/pages/notula/PublicNotula";
+import LiveSessionRapat from "@/pages/notula/LiveSessionRapat";
 
 // Original DashLite Components Preview
 import Component from "@/pages/components/Index";
@@ -98,9 +100,11 @@ const Pages = () => {
           <NotulaProvider>
             <Routes>
               <Route element={<ThemeProvider />}>
-                {/* Public Auth Routes */}
+                {/* Public Auth & Share/Live Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/auth-login" element={<Login />} />
+                <Route path="/publik/:token" element={<PublicNotula />} />
+                <Route path="/sesi/:token" element={<LiveSessionRapat />} />
 
                 {/* Protected Application Routes */}
                 <Route element={<ProtectedLayout />}>

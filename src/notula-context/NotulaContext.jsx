@@ -187,6 +187,12 @@ export const NotulaProvider = ({ children }) => {
         refreshFromDb();
         throw new Error(err.error || "Gagal membuat rapat baru.");
       }
+      const saved = await res.json();
+      setData((prev) => ({
+        ...prev,
+        meetings: prev.meetings.map((item) => (item.id === newM.id ? saved : item)),
+      }));
+      return saved;
     } catch (err) {
       console.error("API error adding meeting:", err);
       throw err;
@@ -213,6 +219,12 @@ export const NotulaProvider = ({ children }) => {
         refreshFromDb();
         throw new Error(err.error || "Gagal memperbarui rapat.");
       }
+      const saved = await res.json();
+      setData((prev) => ({
+        ...prev,
+        meetings: prev.meetings.map((m) => (m.id === id ? { ...m, ...saved } : m)),
+      }));
+      return saved;
     } catch (err) {
       console.error("API error updating meeting:", err);
       throw err;

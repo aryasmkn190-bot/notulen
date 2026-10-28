@@ -109,6 +109,21 @@ const DEFAULT_USERS = [
 ];
 
 // ponytail: schema migration via raw DDL; add migration tool when schema evolution requires rollbacks.
+function generateRandomToken(len = 12) {
+  return crypto.randomBytes(len).toString("base64url").slice(0, len);
+}
+
+// Simple in-memory rate limiter for public live question submissions (per IP + token)
+const liveQuestionRateMap = new Map();
+function checkRateLimit(key, maxRequests = 5, windowMs = 60000) {
+  const now = Date.now();
+  const timestamps = (liveQuestionRateMap.get(key) || []).filter((t) => now - t < windowMs);
+  if (timestamps.length >= maxRequests) return false;
+  timestamps.push(now);
+  liveQuestionRateMap.set(key, timestamps);
+  return true;
+}
+
 async function initDb() {
   await pool.query(`
     CREATE SCHEMA IF NOT EXISTS notula;
@@ -147,6 +162,9 @@ async function initDb() {
     );
 
     ALTER TABLE notula.meetings ADD COLUMN IF NOT EXISTS dokumentasi JSONB DEFAULT '[]'::jsonb;
+    ALTER TABLE notula.meetings ADD COLUMN IF NOT EXISTS public_token TEXT;
+    ALTER TABLE notula.meetings ADD COLUMN IF NOT EXISTS live_token TEXT;
+    ALTER TABLE notula.meetings ADD COLUMN IF NOT EXISTS is_live_active BOOLEAN DEFAULT FALSE;
 
     CREATE TABLE IF NOT EXISTS notula.questions (
       id TEXT PRIMARY KEY,
@@ -193,6 +211,19 @@ async function initDb() {
   if (parseInt(countRes.rows[0].count, 10) === 0) {
     console.log("Seeding database with initial sample data...");
     await seedData(getSeedData());
+  }
+
+  // Ensure all meetings have public_token and live_token
+  const missingTokens = await pool.query(
+    "SELECT id, public_token, live_token FROM notula.meetings WHERE public_token IS NULL OR live_token IS NULL;"
+  );
+  for (const row of missingTokens.rows) {
+    const pubTok = row.public_token || `pub-${generateRandomToken(12)}`;
+    const liveTok = row.live_token || `live-${generateRandomToken(12)}`;
+    await pool.query(
+      "UPDATE notula.meetings SET public_token = $1, live_token = $2 WHERE id = $3;",
+      [pubTok, liveTok, row.id]
+    );
   }
 }
 
@@ -301,6 +332,9 @@ function mapMeeting(m) {
   return {
     ...m,
     is_finalized: Boolean(m.is_finalized),
+    is_live_active: Boolean(m.is_live_active),
+    public_token: m.public_token || null,
+    live_token: m.live_token || null,
     finalized_by: m.finalized_by || null,
     finalized_at: m.finalized_at ? Number(m.finalized_at) : null,
     dokumentasi: typeof m.dokumentasi === "string" ? JSON.parse(m.dokumentasi) : (m.dokumentasi || []),
@@ -411,10 +445,12 @@ const server = http.createServer(async (req, res) => {
       const body = await readBody(req);
       const id = body.id || `m-${Math.random().toString(36).slice(2, 9)}`;
       const now = Date.now();
+      const pubTok = body.public_token || `pub-${generateRandomToken(12)}`;
+      const liveTok = body.live_token || `live-${generateRandomToken(12)}`;
       const insertRes = await pool.query(
         `INSERT INTO notula.meetings (
-          id, judul, jenis, tanggal, waktu, tempat, pemimpin, notulis, peserta, status, agenda, catatan, keputusan, created_at, is_finalized, dokumentasi
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+          id, judul, jenis, tanggal, waktu, tempat, pemimpin, notulis, peserta, status, agenda, catatan, keputusan, created_at, is_finalized, dokumentasi, public_token, live_token, is_live_active
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
         RETURNING *;`,
         [
           id,
@@ -433,6 +469,9 @@ const server = http.createServer(async (req, res) => {
           now,
           false,
           JSON.stringify(body.dokumentasi || []),
+          pubTok,
+          liveTok,
+          Boolean(body.is_live_active),
         ]
       );
       return sendJson(res, mapMeeting(insertRes.rows[0]), 201);
@@ -482,6 +521,35 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, mapMeeting(updateFin.rows[0]));
       }
 
+      // Handle Live Session toggle or token regeneration (allowed for Super Admin & Moderator at any time)
+      const isOnlyLiveOrTokenToggle = Object.keys(body).every((k) =>
+        ["is_live_active", "regenerate_public_token", "regenerate_live_token"].includes(k)
+      );
+
+      if (isOnlyLiveOrTokenToggle && Object.keys(body).length > 0) {
+        const lFields = [];
+        const lVals = [];
+        let lIdx = 1;
+        if (body.is_live_active !== undefined) {
+          lFields.push(`is_live_active = $${lIdx++}`);
+          lVals.push(Boolean(body.is_live_active));
+        }
+        if (body.regenerate_public_token) {
+          lFields.push(`public_token = $${lIdx++}`);
+          lVals.push(`pub-${generateRandomToken(12)}`);
+        }
+        if (body.regenerate_live_token) {
+          lFields.push(`live_token = $${lIdx++}`);
+          lVals.push(`live-${generateRandomToken(12)}`);
+        }
+        lVals.push(id);
+        const updLive = await pool.query(
+          `UPDATE notula.meetings SET ${lFields.join(", ")} WHERE id = $${lIdx} RETURNING *;`,
+          lVals
+        );
+        return sendJson(res, mapMeeting(updLive.rows[0]));
+      }
+
       // If meeting is already finalized, Moderator CANNOT modify notes/agenda/details
       if (existingM.is_finalized && authUser && authUser.role !== "superadmin") {
         return sendJson(res, { error: "Rapat ini telah difinalisasi oleh Super Admin. Catatan notulensi dan rincian rapat terkunci." }, 403);
@@ -494,7 +562,7 @@ const server = http.createServer(async (req, res) => {
       const allowed = [
         "judul", "jenis", "tanggal", "waktu", "tempat",
         "pemimpin", "notulis", "peserta", "status",
-        "agenda", "catatan", "keputusan", "dokumentasi",
+        "agenda", "catatan", "keputusan", "dokumentasi", "is_live_active",
       ];
 
       for (const key of allowed) {
@@ -855,6 +923,150 @@ const server = http.createServer(async (req, res) => {
       } catch (e) {
         return sendJson(res, { error: "Berkas tidak ditemukan" }, 404);
       }
+    }
+
+    // -------------------------------------------------------------
+    // PUBLIC SHARE & LIVE SESSION ENDPOINTS (TOKEN-SCOPED)
+    // -------------------------------------------------------------
+
+    // GET /api/public/notula/:token  (Read-only public view of a single meeting + its questions/RTL)
+    if (req.method === "GET" && path.startsWith("/api/public/notula/")) {
+      const token = decodeURIComponent(path.split("/")[4] || "").trim();
+      if (!token) return sendJson(res, { error: "Token tautan publik tidak valid." }, 400);
+
+      const mRes = await pool.query("SELECT * FROM notula.meetings WHERE public_token = $1;", [token]);
+      if (mRes.rows.length === 0) {
+        return sendJson(res, { error: "Tautan notulensi tidak ditemukan atau telah diperbarui." }, 404);
+      }
+
+      const mRow = mapMeeting(mRes.rows[0]);
+      // Strip internal live_token from public read response for security
+      delete mRow.live_token;
+
+      const qRes = await pool.query(
+        "SELECT * FROM notula.questions WHERE mid = $1 ORDER BY created_at DESC;",
+        [mRow.id]
+      );
+
+      return sendJson(res, {
+        meeting: mRow,
+        questions: qRes.rows.map(mapQuestion),
+        serverTime: Date.now(),
+      });
+    }
+
+    // GET /api/public/live/:token  (Live interactive session state for a single meeting)
+    if (req.method === "GET" && path.startsWith("/api/public/live/") && path.split("/").length === 5) {
+      const token = decodeURIComponent(path.split("/")[4] || "").trim();
+      if (!token) return sendJson(res, { error: "Token sesi rapat tidak valid." }, 400);
+
+      const mRes = await pool.query("SELECT * FROM notula.meetings WHERE live_token = $1;", [token]);
+      if (mRes.rows.length === 0) {
+        return sendJson(res, { error: "Tautan sesi rapat tidak ditemukan atau telah diperbarui." }, 404);
+      }
+
+      const mRow = mapMeeting(mRes.rows[0]);
+      const qRes = await pool.query(
+        "SELECT * FROM notula.questions WHERE mid = $1 ORDER BY created_at DESC;",
+        [mRow.id]
+      );
+
+      return sendJson(res, {
+        meeting: mRow,
+        questions: qRes.rows.map(mapQuestion),
+        serverTime: Date.now(),
+      });
+    }
+
+    // POST /api/public/live/:token/questions  (Participant submits question in active live meeting)
+    if (
+      req.method === "POST" &&
+      path.startsWith("/api/public/live/") &&
+      path.endsWith("/questions")
+    ) {
+      const token = decodeURIComponent(path.split("/")[4] || "").trim();
+      if (!token) return sendJson(res, { error: "Token sesi rapat tidak valid." }, 400);
+
+      const mRes = await pool.query("SELECT * FROM notula.meetings WHERE live_token = $1;", [token]);
+      if (mRes.rows.length === 0) {
+        return sendJson(res, { error: "Tautan sesi rapat tidak ditemukan." }, 404);
+      }
+      const meeting = mRes.rows[0];
+      if (!meeting.is_live_active) {
+        return sendJson(
+          res,
+          { error: "Sesi rapat langsung sedang ditutup oleh pimpinan/notulen rapat." },
+          403
+        );
+      }
+
+      const clientIp =
+        (req.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
+        req.socket?.remoteAddress ||
+        "unknown";
+      if (!checkRateLimit(`${clientIp}:${token}`, 6, 60000)) {
+        return sendJson(
+          res,
+          { error: "Terlalu banyak pengiriman dalam waktu singkat. Silakan tunggu 1 menit." },
+          429
+        );
+      }
+
+      const body = await readBody(req);
+      const penanya = String(body.penanya || "").replace(/[<>]/g, "").trim().slice(0, 80);
+      const unit = String(body.unit || "").replace(/[<>]/g, "").trim().slice(0, 80);
+      const teks = String(body.teks || "").replace(/[<>]/g, "").trim().slice(0, 1500);
+      const kategori = String(body.kategori || "Lainnya").trim().slice(0, 50);
+      const participantKey = String(body.participant_id || "").trim().slice(0, 60);
+
+      if (!penanya || !unit) {
+        return sendJson(res, { error: "Nama lengkap dan jabatan wajib diisi terlebih dahulu." }, 400);
+      }
+      if (!teks || teks.length < 5) {
+        return sendJson(res, { error: "Pertanyaan atau aspirasi terlalu singkat (minimal 5 karakter)." }, 400);
+      }
+
+      const id = `q-${Math.random().toString(36).slice(2, 9)}`;
+      const now = Date.now();
+      const log = [
+        {
+          id: `log-${now}-live`,
+          ts: now,
+          teks: `Diajukan langsung saat sesi rapat oleh ${penanya} (${unit}).`,
+          type: "system",
+          author: penanya,
+        },
+      ];
+
+      const insertRes = await pool.query(
+        `INSERT INTO notula.questions (
+          id, mid, user_id, penanya, unit, teks, kategori, prioritas, status, dibacakan, rencana, output, pic, tenggat, progres, keterangan, log, created_at, lampiran
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+        RETURNING *;`,
+        [
+          id,
+          meeting.id,
+          participantKey || null,
+          penanya,
+          unit,
+          teks,
+          kategori,
+          "Sedang",
+          "baru",
+          false,
+          "",
+          "Belum ditentukan",
+          "",
+          "",
+          0,
+          "",
+          JSON.stringify(log),
+          now,
+          "[]",
+        ]
+      );
+
+      return sendJson(res, mapQuestion(insertRes.rows[0]), 201);
     }
 
     sendJson(res, { error: "Not found" }, 404);
