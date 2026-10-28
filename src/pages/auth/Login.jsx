@@ -96,8 +96,11 @@ const Login = () => {
                   <label className="form-label fs-12px fw-semibold text-dark mb-1.5" htmlFor="username">
                     Username
                   </label>
-                  <div className="form-control-wrap">
-                    <div className="form-icon form-icon-left text-muted">
+                  <div className="form-control-wrap position-relative">
+                    <div
+                      className="form-icon form-icon-left text-muted"
+                      style={{ width: "42px", height: "42px", pointerEvents: "none" }}
+                    >
                       <Icon name="user" />
                     </div>
                     <input
@@ -107,8 +110,8 @@ const Login = () => {
                       autoFocus
                       {...register("username", { required: "Username wajib diisi" })}
                       placeholder="Masukkan username Anda"
-                      className={`form-control ps-4 rounded-3 ${errors.username ? "is-invalid" : ""}`}
-                      style={{ height: "42px", fontSize: "13.5px" }}
+                      className={`form-control rounded-3 ${errors.username ? "is-invalid" : ""}`}
+                      style={{ height: "42px", fontSize: "13.5px", paddingLeft: "42px" }}
                     />
                   </div>
                   {errors.username && (
@@ -121,7 +124,10 @@ const Login = () => {
                     Kata Sandi
                   </label>
                   <div className="form-control-wrap position-relative">
-                    <div className="form-icon form-icon-left text-muted">
+                    <div
+                      className="form-icon form-icon-left text-muted"
+                      style={{ width: "42px", height: "42px", pointerEvents: "none" }}
+                    >
                       <Icon name="lock" />
                     </div>
                     <input
@@ -130,8 +136,8 @@ const Login = () => {
                       autoComplete="current-password"
                       {...register("password", { required: "Kata sandi wajib diisi" })}
                       placeholder="Masukkan kata sandi"
-                      className={`form-control ps-4 pe-5 rounded-3 ${errors.password ? "is-invalid" : ""}`}
-                      style={{ height: "42px", fontSize: "13.5px" }}
+                      className={`form-control rounded-3 ${errors.password ? "is-invalid" : ""}`}
+                      style={{ height: "42px", fontSize: "13.5px", paddingLeft: "42px", paddingRight: "42px" }}
                     />
                     <button
                       type="button"
