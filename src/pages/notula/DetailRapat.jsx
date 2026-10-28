@@ -41,6 +41,7 @@ import {
   sisaHari,
   KATEGORI_LIST,
   PRIORITAS_LIST,
+  PIC_LIST,
   OUTPUT_LIST,
   STATUS_LIST,
   JENIS_LIST,
@@ -1709,14 +1710,23 @@ const DetailRapat = () => {
                             Penanggung Jawab (PIC)
                           </Label>
                           <Input
-                            type="text"
+                            type="select"
                             id="dq-pic"
-                            placeholder="Contoh: Wakasek Kesiswaan / Kaprog TJKT"
                             value={activeQ.pic || ""}
                             onChange={(e) =>
                               setActiveQ({ ...activeQ, pic: e.target.value })
                             }
-                          />
+                          >
+                            <option value="">— Pilih Penanggung Jawab (PIC) —</option>
+                            {activeQ.pic && !PIC_LIST.includes(activeQ.pic) && (
+                              <option value={activeQ.pic}>{activeQ.pic}</option>
+                            )}
+                            {PIC_LIST.map((p) => (
+                              <option key={p} value={p}>
+                                {p}
+                              </option>
+                            ))}
+                          </Input>
                         </FormGroup>
                       </Col>
 
@@ -2327,14 +2337,23 @@ const DetailRapat = () => {
                         <Col sm="6">
                           <Label className="form-label fs-11px mb-1 text-muted">Penanggung Jawab (PIC):</Label>
                           <Input
-                            type="text"
+                            type="select"
                             bsSize="sm"
-                            placeholder="Contoh: Wakasek Kesiswaan"
                             value={q.pic || ""}
                             onChange={(e) => {
                               updateQuestion(q.id, { pic: e.target.value });
                             }}
-                          />
+                          >
+                            <option value="">— Pilih PIC —</option>
+                            {q.pic && !PIC_LIST.includes(q.pic) && (
+                              <option value={q.pic}>{q.pic}</option>
+                            )}
+                            {PIC_LIST.map((p) => (
+                              <option key={p} value={p}>
+                                {p}
+                              </option>
+                            ))}
+                          </Input>
                         </Col>
                       </Row>
 

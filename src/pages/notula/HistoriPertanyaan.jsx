@@ -37,6 +37,7 @@ import {
   sisaHari,
   KATEGORI_LIST,
   PRIORITAS_LIST,
+  PIC_LIST,
   STATUS_LIST,
   OUTPUT_LIST,
 } from "@/notula-context/NotulaContext";
@@ -1063,14 +1064,23 @@ const HistoriPertanyaan = () => {
                             Penanggung Jawab (PIC)
                           </Label>
                           <Input
-                            type="text"
+                            type="select"
                             id="hq-pic"
-                            placeholder="Contoh: Wakasek Kesiswaan / Kaprog TJKT"
                             value={activeQ.pic || ""}
                             onChange={(e) =>
                               setActiveQ({ ...activeQ, pic: e.target.value })
                             }
-                          />
+                          >
+                            <option value="">— Pilih Penanggung Jawab (PIC) —</option>
+                            {activeQ.pic && !PIC_LIST.includes(activeQ.pic) && (
+                              <option value={activeQ.pic}>{activeQ.pic}</option>
+                            )}
+                            {PIC_LIST.map((p) => (
+                              <option key={p} value={p}>
+                                {p}
+                              </option>
+                            ))}
+                          </Input>
                         </FormGroup>
                       </Col>
 

@@ -47,6 +47,31 @@ export const KATEGORI_LIST = [
 
 export const PRIORITAS_LIST = ["Tinggi", "Sedang", "Rendah"];
 
+export const PIC_LIST = [
+  "Kepala Sekolah",
+  "Wakil Kurikulum",
+  "Wakil Kesiswaan",
+  "Wakil Sarana & Prasarana",
+  "Wakil Humas & Hubin (PKL)",
+  "Kepala Tata Usaha",
+  "Bendahara Sekolah",
+  "Koordinator BK",
+  "Kaprog TJKT",
+  "Kaprog PPLG / RPL",
+  "Kaprog DKV",
+  "Kaprog MPLB / Perkantoran",
+  "Kaprog AKL / Akuntansi",
+  "Kaprog Pemasaran / Bisnis Digital",
+  "Kepala Laboratorium & Bengkel",
+  "Kepala Perpustakaan",
+  "Pembina OSIS & Ekstrakurikuler",
+  "Tim IT & Server",
+  "Tim BKK (Bursa Kerja Khusus)",
+  "Tim Penjaminan Mutu Sekolah",
+  "Wali Kelas",
+  "Panitia Kegiatan Sekolah",
+];
+
 export const uid = (p = "id-") => p + Math.random().toString(36).slice(2, 9);
 
 export const DF = new Intl.DateTimeFormat("id-ID", {
