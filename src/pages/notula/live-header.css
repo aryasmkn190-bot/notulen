@@ -1,3 +1,4 @@
+/* Live Meeting Header */
 .live-meeting-header .live-header-inner { display:flex; align-items:center; justify-content:space-between; gap:20px; padding-top:14px; padding-bottom:14px; }
 .live-meeting-header .live-header-brand { display:flex; align-items:center; gap:12px; min-width:0; }
 .live-meeting-header .live-header-brand > img { flex-shrink:0; }
@@ -11,11 +12,189 @@
 .live-meeting-header .live-header-identity strong { font-size:13px; line-height:1.45; overflow-wrap:anywhere; }
 .live-meeting-header .live-header-identity span { line-height:1.5; overflow-wrap:anywhere; }
 .live-meeting-header .live-header-identity button { flex-shrink:0; display:flex; align-items:center; justify-content:center; min-width:36px; min-height:36px; margin:0!important; padding:0!important; border-radius:8px; }
+
+/* Public Notula Header & Layout */
+.public-meeting-header .public-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 16px;
+}
+.public-meeting-header .public-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+.public-meeting-header .public-header-brand > img {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+.public-meeting-header .public-header-title-wrap {
+  min-width: 0;
+}
+.public-meeting-header .public-header-title {
+  font-weight: 700;
+  font-size: 14.5px;
+  line-height: 1.3;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.public-meeting-header .public-header-subtitle {
+  margin-top: 2px;
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.public-meeting-header .public-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.public-meeting-header .public-print-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+/* Public Meeting Metadata & Role Boxes */
+.public-meta-list {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 6px;
+  column-gap: 16px;
+  font-size: 12.5px;
+  color: #64748b;
+}
+.public-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.public-role-box {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  height: 100%;
+}
+.public-role-label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #64748b;
+  margin-bottom: 3px;
+}
+.public-role-value {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.4;
+}
+
+/* Public & Live Responsive Tabs */
+.notula-Horizontal-tabs {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  gap: 4px;
+  padding: 6px 12px 0 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+.notula-Horizontal-tabs::-webkit-scrollbar {
+  display: none;
+}
+.notula-Horizontal-tabs .nav-item {
+  flex-shrink: 0;
+}
+.notula-Horizontal-tabs .nav-link {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  padding: 10px 12px !important;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  border: none !important;
+  border-bottom: 2.5px solid transparent !important;
+  background: transparent !important;
+}
+.notula-Horizontal-tabs .nav-link.active {
+  color: #2563eb !important;
+  border-bottom-color: #2563eb !important;
+}
+
+.notula-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
 @media(max-width:575.98px) {
- .live-meeting-header .live-header-inner { flex-direction:column; align-items:stretch; gap:12px; padding:14px 16px; }
- .live-meeting-header .live-header-brand { gap:10px; }
- .live-meeting-header .live-header-brand > div { flex:1; }
- .live-meeting-header .live-header-brand > div > div:first-child > span:first-child { font-size:14px; }
- .live-meeting-header .live-header-identity { width:100%; max-width:none; padding:9px 12px; }
- .live-meeting-header .live-header-identity span { display:block; font-size:11px; }
+  .live-meeting-header .live-header-inner { flex-direction:column; align-items:stretch; gap:12px; padding:14px 16px; }
+  .live-meeting-header .live-header-brand { gap:10px; }
+  .live-meeting-header .live-header-brand > div { flex:1; }
+  .live-meeting-header .live-header-brand > div > div:first-child > span:first-child { font-size:14px; }
+  .live-meeting-header .live-header-identity { width:100%; max-width:none; padding:9px 12px; }
+  .live-meeting-header .live-header-identity span { display:block; font-size:11px; }
+
+  .public-meeting-header .public-header-inner {
+    padding: 11px 14px;
+    gap: 10px;
+  }
+  .public-meeting-header .public-header-brand {
+    gap: 10px;
+  }
+  .public-meeting-header .public-header-brand > img {
+    width: 34px;
+    height: 34px;
+  }
+  .public-meeting-header .public-header-title {
+    font-size: 14px;
+  }
+  .public-meeting-header .public-header-subtitle {
+    font-size: 11px;
+    white-space: normal;
+  }
+  .public-meeting-header .public-print-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  .notula-Horizontal-tabs {
+    padding: 4px 8px 0 8px;
+  }
+  .notula-Horizontal-tabs .nav-link {
+    padding: 9px 10px !important;
+    font-size: 12.5px;
+  }
 }

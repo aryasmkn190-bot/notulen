@@ -451,7 +451,7 @@ const LiveSessionRapat = () => {
           )}
 
           {/* Mobile/Tablet Tabs & Desktop Split View */}
-          <Nav tabs className="mb-3 bg-white px-3 pt-2 rounded-top-3 border-top border-start border-end">
+          <Nav tabs className="notula-Horizontal-tabs mb-3">
             <NavItem>
               <NavLink
                 className={classnames({ active: activeTab === "tanya" })}

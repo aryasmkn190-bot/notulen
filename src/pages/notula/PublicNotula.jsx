@@ -24,6 +24,7 @@ import LogoHassina from "@/images/logo-hassina.png";
 import Head from "@/layout/head/Head";
 import { Icon } from "@/components/Component";
 import { fDate, sisaHari, STATUS_LIST } from "@/notula-context/NotulaContext";
+import "./live-header.css";
 
 const PublicNotula = () => {
   const { token } = useParams();
@@ -113,32 +114,33 @@ const PublicNotula = () => {
       <Head title={`${meeting.judul} — Notula Publik SMK Hassina`} />
       <div className="min-vh-100 d-flex flex-column" style={{ backgroundColor: "#f8fafc" }}>
         {/* Top Header */}
-        <header className="bg-white border-bottom sticky-top shadow-xs d-print-none">
-          <div className="container-xl py-2.5 px-3 px-md-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
-            <div className="d-flex align-items-center gap-2.5">
+        <header className="public-meeting-header bg-white border-bottom sticky-top shadow-xs d-print-none">
+          <div className="container-xl public-header-inner">
+            <div className="public-header-brand">
               <img
                 src={LogoHassina}
                 alt="SMK Hassina"
-                style={{ width: "34px", height: "34px", objectFit: "contain" }}
               />
-              <div>
-                <div className="fw-bold text-dark fs-14px lh-sm">Notula Rapat Publik</div>
-                <div className="text-muted fs-11px">SMK Hassina Sukabumi · Mode Baca &amp; Pantau RTL</div>
+              <div className="public-header-title-wrap">
+                <div className="public-header-title">
+                  <span>Notula Rapat Publik</span>
+                </div>
+                <div className="public-header-subtitle">SMK Hassina Sukabumi · Mode Baca &amp; Pantau RTL</div>
               </div>
             </div>
 
-            <div className="d-flex align-items-center gap-2">
+            <div className="public-header-actions">
               {lastSync && (
-                <span className="badge bg-light text-muted border fw-normal fs-11px d-none d-sm-inline-flex align-items-center">
+                <span className="badge bg-light text-muted border fw-normal fs-11px d-none d-sm-inline-flex align-items-center gap-1">
                   <span
-                    className="rounded-circle bg-success me-1.5"
+                    className="rounded-circle bg-success"
                     style={{ width: "6px", height: "6px", display: "inline-block" }}
                   />
-                  Sinkron otomatis ({lastSync.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })})
+                  <span>Sinkron otomatis ({lastSync.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })})</span>
                 </span>
               )}
-              <Button color="light" outline size="sm" className="bg-white" onClick={() => window.print()}>
-                <Icon name="printer" className="me-1" />
+              <Button color="light" outline size="sm" className="bg-white public-print-btn" onClick={() => window.print()}>
+                <Icon name="printer" />
                 <span>Cetak</span>
               </Button>
             </div>
@@ -146,7 +148,7 @@ const PublicNotula = () => {
         </header>
 
         {/* Main Container */}
-        <main className="flex-grow-1 container-xl py-4 px-3 px-md-4 d-print-none">
+        <main className="flex-grow-1 container-xl py-3 py-md-4 px-3 px-md-4 d-print-none">
           {/* Meeting Title & Status Header */}
           <Card className="border bg-white rounded-4 shadow-xs mb-3">
             <CardBody className="p-3 p-md-4">
@@ -169,42 +171,42 @@ const PublicNotula = () => {
                 )}
               </div>
 
-              <h3 className="fw-bold text-dark mb-2" style={{ fontSize: "21px", letterSpacing: "-0.01em" }}>
+              <h3 className="fw-bold text-dark mb-2" style={{ fontSize: "19px", lineHeight: "1.35", letterSpacing: "-0.01em" }}>
                 {meeting.judul}
               </h3>
 
-              <div className="text-muted fs-12px d-flex flex-wrap gap-3 mb-3">
-                <span>
-                  <Icon name="calendar" className="me-1 text-primary" />
-                  {fDate(meeting.tanggal)}
+              <div className="public-meta-list mb-3">
+                <span className="public-meta-item">
+                  <Icon name="calendar" className="text-primary" />
+                  <span>{fDate(meeting.tanggal)}</span>
                 </span>
-                <span>
-                  <Icon name="clock" className="me-1 text-primary" />
-                  {meeting.waktu || "-"}
+                <span className="public-meta-item">
+                  <Icon name="clock" className="text-primary" />
+                  <span>{meeting.waktu || "-"}</span>
                 </span>
-                <span>
-                  <Icon name="map-pin" className="me-1 text-primary" />
-                  {meeting.tempat || "-"}
+                <span className="public-meta-item">
+                  <Icon name="map-pin" className="text-primary" />
+                  <span>{meeting.tempat || "-"}</span>
                 </span>
               </div>
 
               <Row className="g-2 pt-3 border-top">
                 <Col md="4" sm="6">
-                  <div className="p-2.5 rounded-3 bg-light border">
-                    <span className="text-muted fs-10px text-uppercase fw-bold d-block">Pemimpin Rapat</span>
-                    <strong className="text-dark fs-12px">{meeting.pemimpin || "-"}</strong>
+                  <div className="public-role-box">
+                    <span className="public-role-label">Pemimpin Rapat</span>
+                    <strong className="public-role-value">{meeting.pemimpin || "-"}</strong>
                   </div>
                 </Col>
                 <Col md="4" sm="6">
-                  <div className="p-2.5 rounded-3 bg-light border">
-                    <span className="text-muted fs-10px text-uppercase fw-bold d-block">Notulis</span>
-                    <strong className="text-dark fs-12px">{meeting.notulis || "-"}</strong>
+                  <div className="public-role-box">
+                    <span className="public-role-label">Notulis</span>
+                    <strong className="public-role-value">{meeting.notulis || "-"}</strong>
                   </div>
                 </Col>
                 <Col md="4" sm="12">
-                  <div className="p-2.5 rounded-3 bg-light border">
-                    <span className="text-muted fs-10px text-uppercase fw-bold d-block">Peserta Rapat</span>
-                    <strong className="text-dark fs-12px">{meeting.peserta || "-"}</strong>
+                  <div className="public-role-box">
+                    <span className="public-role-label">Peserta Rapat</span>
+                    <strong className="public-role-value">{meeting.peserta || "-"}</strong>
                   </div>
                 </Col>
               </Row>
@@ -212,14 +214,14 @@ const PublicNotula = () => {
           </Card>
 
           {/* Navigation Tabs */}
-          <Nav tabs className="mb-3 bg-white px-3 pt-2 rounded-top-3 border-top border-start border-end">
+          <Nav tabs className="notula-Horizontal-tabs mb-3">
             <NavItem>
               <NavLink
                 className={classnames({ active: activeTab === "notulensi" })}
                 onClick={() => setActiveTab("notulensi")}
                 style={{ cursor: "pointer" }}
               >
-                <Icon name="file-docs" className="me-1" />
+                <Icon name="file-docs" />
                 <span>Catatan Notulensi</span>
               </NavLink>
             </NavItem>
@@ -229,7 +231,7 @@ const PublicNotula = () => {
                 onClick={() => setActiveTab("pertanyaan")}
                 style={{ cursor: "pointer" }}
               >
-                <Icon name="help" className="me-1" />
+                <Icon name="help" />
                 <span>Pertanyaan &amp; Keputusan ({questions.length})</span>
               </NavLink>
             </NavItem>
@@ -239,7 +241,7 @@ const PublicNotula = () => {
                 onClick={() => setActiveTab("rtl")}
                 style={{ cursor: "pointer" }}
               >
-                <Icon name="task" className="me-1" />
+                <Icon name="task" />
                 <span>Pantau Tindak Lanjut / RTL ({rtlQuestions.length})</span>
               </NavLink>
             </NavItem>
@@ -251,9 +253,9 @@ const PublicNotula = () => {
               <Card className="border bg-white rounded-4 shadow-xs">
                 <CardBody className="p-3 p-md-4">
                   <div className="mb-4">
-                    <h6 className="fw-bold text-dark fs-14px mb-2 d-flex align-items-center">
-                      <Icon name="list-check" className="text-primary me-1.5" />
-                      1. Agenda Rapat
+                    <h6 className="notula-section-heading">
+                      <Icon name="list-check" className="text-primary" />
+                      <span>1. Agenda Rapat</span>
                     </h6>
                     <div
                       className="p-3 rounded-3 bg-light border fs-13px text-dark"
@@ -264,9 +266,9 @@ const PublicNotula = () => {
                   </div>
 
                   <div className="mb-4">
-                    <h6 className="fw-bold text-dark fs-14px mb-2 d-flex align-items-center">
-                      <Icon name="notes-alt" className="text-primary me-1.5" />
-                      2. Jalannya Diskusi &amp; Pemaparan Materi
+                    <h6 className="notula-section-heading">
+                      <Icon name="notes-alt" className="text-primary" />
+                      <span>2. Jalannya Diskusi &amp; Pemaparan Materi</span>
                     </h6>
                     <div
                       className="p-3 rounded-3 bg-light border fs-13px text-dark"
@@ -277,9 +279,9 @@ const PublicNotula = () => {
                   </div>
 
                   <div className="mb-4">
-                    <h6 className="fw-bold text-dark fs-14px mb-2 d-flex align-items-center">
-                      <Icon name="check-circle-cut" className="text-success me-1.5" />
-                      3. Kesepakatan &amp; Keputusan Resmi
+                    <h6 className="notula-section-heading">
+                      <Icon name="check-circle-cut" className="text-success" />
+                      <span>3. Kesepakatan &amp; Keputusan Resmi</span>
                     </h6>
                     <div
                       className="p-3 rounded-3 bg-success-dim border border-success border-opacity-25 fs-13px text-dark"
@@ -292,9 +294,9 @@ const PublicNotula = () => {
                   {/* Dokumentasi Rapat */}
                   {meeting.dokumentasi && meeting.dokumentasi.length > 0 && (
                     <div className="pt-3 border-top">
-                      <h6 className="fw-bold text-dark fs-14px mb-2 d-flex align-items-center">
-                        <Icon name="img" className="text-primary me-1.5" />
-                        4. Dokumentasi &amp; Lampiran Rapat ({meeting.dokumentasi.length})
+                      <h6 className="notula-section-heading">
+                        <Icon name="img" className="text-primary" />
+                        <span>4. Dokumentasi &amp; Lampiran Rapat ({meeting.dokumentasi.length})</span>
                       </h6>
                       <Row className="g-3 mt-1">
                         {meeting.dokumentasi.map((doc, idx) => {
